@@ -1,0 +1,91 @@
+/* html {
+    font-size: 14px;
+}
+
+body {
+    background: #eff3f8;
+    padding: 1rem;
+} */
+:root {
+  --red-color: #f4180e
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.card {
+  background: #ffffff;
+  padding: 0 0.5rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.p-datatable .p-datatable-header {
+  width: 100%;
+  margin: 0.6rem auto;
+  font-size: 1rem !important;
+  background-color: transparent;
+}
+
+.p-datatable {
+  padding: 5px;
+}
+
+.custom-filter .p-column-filter {
+  margin-left: 4px;
+}
+
+.custom-filter .p-column-filter input {
+  /* padding-left: 8px; */
+  padding: 2px 2px 2px 6px;
+  font-size: 14px;
+  width: 9rem;
+}
+
+.custom-filter .p-column-filter::placeholder {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.p-column-filter-row-items {
+  padding: 5px 8px;
+  height: 150px;
+}
+
+.p-column-filter-row-items .p-column-filter-row-item {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+
+/* menu list design */
+.nav-menu,
+.nav-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-menu li {
+  position: relative;
+
+}
+
+.nav-menu ul {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+}
+
+.nav-menu li:hover>ul {
+  display: block;
+  /* width: 250px !important; */
+}

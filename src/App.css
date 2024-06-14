@@ -1,0 +1,320 @@
+.small-alert {
+  width: 350px;
+  height: 300px;
+  font-size: 13px;
+}
+
+.custom-datepicker {
+  /* Adjust width as needed */
+  width: 133%;
+  /* Adjust height as needed */
+}
+
+.picker {
+  /* position: absolute; */
+  border: none;
+  /* width:"100%" */
+}
+
+.range {
+  border: "none";
+}
+
+.input-label {
+  font-size: 14px !important;
+}
+
+.global-label-tag {
+  font-size: 14px !important
+}
+
+.placeholder::placeholder {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+}
+
+.error-validation {
+  font-weight: 600;
+  color: var(--red-color) !important;
+  font-size: 12px;
+  margin-top: 4px;
+  height: 1px;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+}
+
+#mnuC002001 {
+  /* border: 1px solid red; */
+}
+
+#mnuC002001 .nav-link-text {
+  border: 1px solid #EB6400;
+  margin-top: -5px;
+}
+
+
+#mnuC002015 .nav-link-text {
+  border: 1px solid #EB6400;
+  margin-top: -5px;
+}
+
+#mnuC002013 .nav-link-text {
+  border: 1px solid #EB6400;
+  margin-top: -5px;
+}
+
+#mnuC002016 .nav-link-text {
+  border: 1px solid #EB6400;
+  margin-top: -5px;
+}
+
+#mnuC002022 .nav-link-text {
+  border: 1px solid #EB6400;
+  margin-top: -5px;
+
+
+}
+
+#mnuC00202 .nav-link-text {
+  border: 1px solid #EB6400;
+
+
+
+}
+
+#mnuC002002 ul::before {
+  display: none !important;
+}
+
+#mnuC002002 span::before {
+  display: none !important;
+}
+
+
+
+.nav-function-minify:not(.nav-function-top) .page-sidebar .primary-nav .nav-menu>li>a+ul:before {
+
+  font-family: 'nextgen-icons';
+  position: absolute;
+  font-size: 3.5rem;
+
+  color: #584475;
+
+  overflow: hidden;
+  display: block;
+  top: 1rem;
+}
+
+.nav-function-minify:not(.nav-function-top) .page-sidebar .primary-nav:hover .nav-menu>li:hover>a>.nav-link-text:last-child:before {
+  /* content: "\f1c8"; */
+  font-family: 'nextgen-icons';
+  position: absolute;
+  font-size: 3.5rem;
+  /* left: -7px; */
+  color: #584475;
+  z-index: -1;
+  /* transform: rotate(270deg); */
+  overflow: hidden;
+  display: block;
+  top: -9px;
+}
+
+.adbutton {
+  background-color: #EB6400 !important;
+  border-color: #EB6400;
+  padding: 0px 3px;
+  width: 70px;
+  color: white;
+  float: right
+    /* height: 10px; */
+}
+
+#mnuC002019 ul {
+  border: 2px solid #EB6400;
+}
+
+#mnuC002019 span::before {
+  display: none;
+}
+
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.react-selec {
+  width: 100%;
+}
+
+#modal {
+  opacity: 1.0 !important;
+}
+
+.red-row {
+  background-color: rgb(252, 198, 198) !important;
+  /* color: white !important;  */
+}
+
+.hightLight-cell .hightlight-span {
+  background-color: red;
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  padding: 5px;
+  color: white;
+}
+
+.text-decoration {
+  text-decoration: none !important;
+}
+
+#txtSearchSecurity::placeholder {
+  font-size: 12px !important;
+}
+
+.template-btn:hover {
+  color: #9e4506;
+}
+
+.template-btn {
+  margin-right: 10px;
+  height: 30px;
+  border: none;
+  background-color: transparent;
+  color: #eb6400;
+  font-weight: 600;
+
+}
+
+.custom-export-button {
+  border: none !important;
+  /* Ensure no border is applied */
+  background-color: transparent !important;
+  padding: 10px;
+  cursor: pointer;
+  color: #eb6400;
+  /* font-size: 15px; */
+  /* font-weight: 600; */
+}
+
+.custom-export-button:hover {
+  color: #9e4506;
+}
+
+.checkbox-color:checked {
+  accent-color: #eb6400 !important;
+}
+
+/* multi select dropdown */
+
+.multiselect-dropdown ul {
+  height: 150px;
+}
+
+.searchWrapper {
+  max-height: 40px !important;
+  overflow-y: auto;
+  min-height: 38px !important;
+}
+
+.chip {
+  background: orange !important
+}
+
+.highlightOption {
+  background: orange !important;
+}
+
+.multiSelectContainer li:hover {
+  background: orange !important;
+}
+
+.multiSelectContainer input {
+  accent-color: orange !important;
+}
+
+li>a:hover,
+.nav-link-text:hover {
+  color: white !important;
+}
+
+.nav-menu ul {
+  position: revert !important;
+}
+
+.page-header {
+  height: 40px !important;
+}
+
+.page-logo {
+  height: 40px !important;
+}
+
+.page-content {
+  padding: 0.8rem 1.5rem !important;
+}
+
+.tree-menu {
+  display: flex;
+  gap: 10px;
+
+}
+
+.p-checkbox:not(.p-disabled):has(.p-checkbox-input:hover).p-highlight .p-checkbox-box {
+  background-color: orange !important;
+  border-color: orange !important;
+}
+
+.p-tree .p-tree-container .p-treenode .p-treenode-content.p-highlight .p-tree-toggler,
+.p-tree .p-tree-container .p-treenode .p-treenode-content.p-highlight .p-treenode-icon {
+  color: orange !important;
+}
+
+.p-tree .p-tree-container .p-treenode .p-treenode-content.p-highlight {
+  color: orange !important;
+}
+
+.p-checkbox.p-highlight .p-checkbox-box {
+  background-color: orange !important;
+  border-color: orange !important;
+}
+
+.p-checkbox-input:hover {
+  border-color: orange !important;
+}
+
+.modal-footer {
+  padding: 0px !important;
+  margin: 0 10px 5px 10px;
+}
+
+.error-table,
+.error-table th,
+td {
+  border: 0.1px solid rgb(211, 208, 208);
+  border-collapse: collapse;
+}
+
+.back-btn:hover {
+  background-color: #fa8634;
+}
