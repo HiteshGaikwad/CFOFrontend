@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom/dist";
 
 const Footer = () => {
-  let year= new Date();
+  let year = new Date();
   return (
     <footer b-plww7kkrdh="" className="page-footer" role="contentinfo">
       <div
@@ -12,7 +12,7 @@ const Footer = () => {
       >
         <span b-plww7kkrdh="" className="hidden-md-down fw-700">
           {" "}
-          {year.getFullYear()} © CFO by&nbsp;
+          {year.getFullYear()} © CFO Portal by&nbsp;
           <span className="text-decoration">
             <Link
               b-plww7kkrdh=""

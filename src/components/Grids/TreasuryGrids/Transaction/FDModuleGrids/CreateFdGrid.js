@@ -8,6 +8,8 @@ import {
 import { FaRegEdit } from "react-icons/fa";
 import DeleteButton from "../../../../../config/DeleteButton";
 import excelLogo from '../../../../../assets/images/excel-logo.svg'
+import wordLogo from "../../../../../assets/images/word.png"
+import { BASE_URL } from "../../../../../config/url";
 
 const CreateFdGrid = ({
   userInfo,
@@ -15,7 +17,9 @@ const CreateFdGrid = ({
   handleDeleteUser,
   setAddUser,
   setIsEdit,
+  searchInput = { searchInput }
 }) => {
+  console.log(userInfo)
   const columns = useMemo(
     (item) => [
       {
@@ -40,12 +44,14 @@ const CreateFdGrid = ({
       {
         Header: "From Date",
         accessor: "Fromdate",
+        Cell: ({ value }) => value ? value.slice(0, 10) : '',
         width: 100,
         minWidth: 100,
       },
       {
         Header: "Maturity Date",
         accessor: "MaturityDate",
+        Cell: ({ value }) => value ? value.slice(0, 10) : '',
         width: 200,
         minWidth: 120,
       },
@@ -123,9 +129,9 @@ const CreateFdGrid = ({
         disableSortBy: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <button style={{ border: 'none' }}>
+            <button style={{ border: 'none' }} onClick={() => downloadWordFile(row?.original?.FDID)}>
               <img
-                src={excelLogo}
+                src={wordLogo}
                 alt="excel file logo"
                 title="Excel file "
                 style={{ width: "30px" }}
@@ -180,21 +186,36 @@ const CreateFdGrid = ({
   };
 
   // Function to download CSV file
-  const downloadCSV = () => {
-    const csvContent = convertToCSV();
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "CreateFD-Data.csv");
-      link.style.visibility = "hidden";
+  const downloadCSV = async () => {
+    try {
+      const url = `${BASE_URL}user/DownloadCreateFD?FDNo=${searchInput ? searchInput : ''}`;
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'employee-details-master.xlsx');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    } catch (error) {
     }
-  };
+  }
+  const downloadWordFile = (id) => {
+    try {
+      const url = `${BASE_URL}user/CreateWordDocument?FDID=${id}`;
+      // Create a temporary anchor element
+      const link = document.createElement('a');
+      link.href = url;
+      // Set the download attribute with a default file name
+      link.setAttribute('download', 'CreateFD.docx');
+      // Append the link to the body
+      document.body.appendChild(link);
+      // Programmatically click the link to trigger the download
+      link.click();
+      // Remove the link from the document
+      document.body.removeChild(link);
+    } catch (error) {
 
+    }
+  }
   return (
     <div className="city-table-container" style={{ position: "relative" }}>
       <div
@@ -419,7 +440,7 @@ const CreateFdGrid = ({
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <div>
+          {/* <div>
             {Array.from(
               { length: Math.min(10, pageOptions.length) },
               (_, i) => {
@@ -444,7 +465,7 @@ const CreateFdGrid = ({
                 );
               }
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}

@@ -9,6 +9,7 @@ import { FaRegEdit } from "react-icons/fa";
 import DeleteButton from "../../.././config/DeleteButton";
 import { RestfullApiService } from "../../../config/Api's";
 import { BASE_URL } from "../../../config/url";
+import { getUserDataFromStorage } from "../../../config/service";
 
 const RPTCompanyMasterGrid = ({
   companyMaster,
@@ -18,6 +19,7 @@ const RPTCompanyMasterGrid = ({
   setAddCompanyMaster,
   setIsEdit,
 }) => {
+  const userData = getUserDataFromStorage()
   const columns = useMemo(
     () => [
       {
@@ -90,9 +92,11 @@ const RPTCompanyMasterGrid = ({
                 margin: "0px 13px",
               }}
               onClick={() => {
-                handleEditCompanyMaster(row.original);
-                setAddCompanyMaster(true);
-                setIsEdit(true);
+                if (userData?.Role === 'Maker') {
+                  handleEditCompanyMaster(row.original);
+                  setAddCompanyMaster(true);
+                  setIsEdit(true);
+                }
               }}
             >
               <FaRegEdit style={{ color: "#EB6400", fontSize: "18px" }} />
@@ -156,22 +160,6 @@ const RPTCompanyMasterGrid = ({
     ].join("\n");
     return csvContent;
   };
-
-  // Function to download CSV file
-  // const downloadCSV = () => {
-  //   const csvContent = convertToCSV();
-  //   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  //   const link = document.createElement("a");
-  //   if (link.download !== undefined) {
-  //     const url = URL.createObjectURL(blob);
-  //     link.setAttribute("href", url);
-  //     link.setAttribute("download", "RPTCompanyDetails.csv");
-  //     link.style.visibility = "hidden";
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     document.body.removeChild(link);
-  //   }
-  // };
 
   const downloadCSV = async () => {
     try {
@@ -419,7 +407,7 @@ const RPTCompanyMasterGrid = ({
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <div>
+          {/* <div>
             {Array.from(
               { length: Math.min(10, pageOptions.length) },
               (_, i) => {
@@ -444,7 +432,7 @@ const RPTCompanyMasterGrid = ({
                 );
               }
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}

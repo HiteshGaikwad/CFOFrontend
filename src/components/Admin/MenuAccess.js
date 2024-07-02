@@ -195,6 +195,20 @@ const MenuAccess = () => {
     setSelectedKeys(updatedSelectedKeys);
   };
 
+  const handleExport = async () => {
+    try {
+      const url = `${BASE_URL}user/DownloadEmployeeMenuAccessData`;
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Menu-access-details.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Failed to download CSV", error);
+    }
+  }
+
   useEffect(() => {
     getMenuList()
     getEmployess()
@@ -335,10 +349,13 @@ const MenuAccess = () => {
 
                       </div>
                       {/* </div> */}
+                      <div style={{ width: '100%', display: 'flex', justifyContent: 'right', paddingRight: '20px' }}>
+                        <button className="custom-export-button" style={{ fontSize: '15px', fontWeight: '500' }} onClick={() => handleExport()}>Export</button>
+                      </div>
                       {
                         roleMenuList?.length > 0 &&
                         <Tree value={roleMenuList} selectionMode="checkbox" selectionKeys={selectedKeys}
-                          onSelectionChange={(e) => handleSelectedKeys(e)} className="w-full mt-5 tree-menu" style={{ fontSize: '14px' }} />
+                          onSelectionChange={(e) => handleSelectedKeys(e)} className="w-full mt-0 tree-menu" style={{ fontSize: '14px' }} />
                       }
                     </div>
                   </div>

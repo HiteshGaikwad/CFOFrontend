@@ -52,7 +52,7 @@ const SideBar = () => {
           {/* </a> */}
         </div>
         {/* BEGIN PRIMARY NAVIGATION   */}
-        <nav id="js-primary-nav" className="primary-nav" role="navigation" >
+        <nav id="js-primary-nav" className="primary-nav" role="navigation" style={{ paddingBottom: '50px' }}>
           {/* <div className="nav-filter">
             <div className="position-relative">
               <input

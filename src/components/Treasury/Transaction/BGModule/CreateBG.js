@@ -91,6 +91,7 @@ const FdTransactionData = {
   Entity: '',
   Entity_Id: 0,
   Bank_Name: '',
+  Bank_Name_Id: 0,
   Bank_Branch: '',
   Bank_Branch_Id: 0,
   BG_No: '',
@@ -118,8 +119,46 @@ const FdTransactionData = {
   Prematurity_Date: '',
   Remarks: ''
 };
+const err = {
+  Entity: '',
+  Bank_Name: '',
+  Bank_Branch: '',
+  BG_No: '',
+  Issued_To: '',
+  Purpose: '',
+  BG_Amt: '',
+  Effective_Date: '',
+  Expiry_Date: '',
+  Withdrawal_Date: '',
+  Status: '',
+  Rating_Recd: '',
+  FD_Amt: '',
+  Debit_Account_No: '',
+  Commission: '',
+  Approved_Reject_Reason: '',
+  Prematured_BG_Rate: '',
+  Prematurity_Date: '',
+};
+const actions = [
+  {
+    label: 'Pending With Maker',
+    value: 'Pending With Maker'
+  },
+  {
+    label: 'Pending With Checker',
+    value: 'Pending With Checker'
+  },
+  {
+    label: 'Approved',
+    value: 'Approved'
+  },
+  {
+    label: 'Rejected',
+    value: 'Rejected'
+  },
+]
 const CreateBG = ({ props }) => {
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState('');
   const [userInfo, setUserInfo] = useState([]);
   const [addUser, setAddUser] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -131,36 +170,17 @@ const CreateBG = ({ props }) => {
   const [bankBranches, setBankBranches] = useState([]);
   const [purpose, setPurpose] = useState([]);
   const [issuedTo, setIssuedTo] = useState([]);
-  const [bgReplicationCount, setBgReplicationCount] = useState([]);
 
   const [entityList, setEntityList] = useState([]);
   const [status, setStatus] = useState([]);
+  const [action, setAction] = useState('');
 
   const fileInputRef = useRef(null);
 
 
   const [newBGTransactionEntry, setNewBGTransactionEntry] =
     useState(FdTransactionData);
-  const err = {
-    Entity: '',
-    Bank_Name: '',
-    Bank_Branch: '',
-    BG_No: '',
-    Issued_To: '',
-    Purpose: '',
-    BG_Amt: '',
-    Effective_Date: '',
-    Expiry_Date: '',
-    Withdrawal_Date: '',
-    Status: '',
-    Rating_Recd: '',
-    FD_Amt: '',
-    Debit_Account_No: '',
-    Commission: '',
-    Approved_Reject_Reason: '',
-    Prematured_BG_Rate: '',
-    Prematurity_Date: '',
-  };
+
 
   const customStyles = {
     control: (provided, state) => ({
@@ -189,40 +209,6 @@ const CreateBG = ({ props }) => {
     }),
   };
 
-  const handleDateChange = (date) => {
-    // If a date is selected, generate the current time and combine it with the selected date
-
-    let currentDate = "";
-    currentDate +=
-      date.slice(8, 10) + "-" + date.slice(5, 7) + "-" + date.slice(0, 4);
-
-    setNewBGTransactionEntry({
-      ...newBGTransactionEntry,
-      Investment_Date: currentDate,
-      // Read_Date: currentDate,
-    });
-    setError((prevErrors) => ({
-      ...prevErrors,
-      Investment_Date: "",
-    }));
-  };
-
-  // search user data
-  async function handleSearchUser() {
-    try {
-      setError({});
-
-      let data = {
-        // Org_Id: userData?.OrgId,
-        // Method_Name: "Get",
-        // Login_User_Id: userData?.UserId,
-        // User_Id: "",
-        // User_Name: searchInput,
-      };
-      // const result = await RestfullApiService(data, "master/GetUserMaster");
-      // setUserInfo(result.Result);
-    } catch (error) { }
-  }
 
   useEffect(() => {
     const inputFields = document.querySelectorAll("input, textarea");
@@ -275,7 +261,6 @@ const CreateBG = ({ props }) => {
 
   // save user data
   async function handleSaveUser() {
-    console.log(newBGTransactionEntry);
     let notify = null;
     if (isEdit) {
       notify = () => toast.success("User updated successfully.");
@@ -299,13 +284,13 @@ const CreateBG = ({ props }) => {
       // Update newUser object with trimmed values
       setNewBGTransactionEntry(trimmedUser);
       // Perform validation
-      if (newBGTransactionEntry?.Entity === "") {
+      if (newBGTransactionEntry?.Entity === "" && newBGTransactionEntry?.Entity_Id === 0) {
         errors = { ...errors, Entity: "Please Select Entity." };
       }
-      if (newBGTransactionEntry?.Bank_Name === "") {
+      if (newBGTransactionEntry?.Bank_Name === "" && newBGTransactionEntry?.Bank_Name_Id === 0) {
         errors = { ...errors, Bank_Name: "Please Select Bank Name." };
       }
-      if (newBGTransactionEntry?.Bank_Branch === "") {
+      if (newBGTransactionEntry?.Bank_Branch === "" && newBGTransactionEntry?.Bank_Branch_Id === 0) {
         errors = {
           ...errors,
           Bank_Branch: "Please Select Bank Branch.",
@@ -436,7 +421,6 @@ const CreateBG = ({ props }) => {
           data,
           "user/SaveBGTransctionCreateBG"
         );
-        console.log(result)
 
         if (result.Status === 200) {
           notify();
@@ -573,56 +557,81 @@ const CreateBG = ({ props }) => {
   };
 
   const handleDeleteUser = async (user) => {
-    const notify = () => toast.success("User deleted successfully.");
+    let notify = null;
     try {
       let data = {
-        //   Org_Id: userData?.OrgId,
-        //   Method_Name: "Delete",
-        //   Login_User_Id: userData?.UserId,
-        //   User_Id: user.User_Id,
-        //   User_Name: "",
-        //   UserType_Id: 0,
-        //   User_Password: "",
-        //   Employee_Id: "",
-        //   User_Display_Name: "",
-        //   Role_Id: "",
-        //   Is_Employee: -1,
-        //   Designation: "",
-        //   Mobile: "",
-        //   Landline: "",
-        //   Email: "",
-        //   Is_Active: 1,
+        BG_ID: user?.BG_ID
       };
       // API call
-      const result = await RestfullApiService(data, "master/SaveUserMaster");
-      if (result.Status === 200) {
-        notify();
+      const result = await RestfullApiService(data, "user/DeleteBGTransctionCreateBG");
+      if (result?.Status === 200) {
+        notify = () => toast.success(result?.Description);
       }
       handleSearchUser();
+      notify()
     } catch (error) { }
   };
 
-  function handleEditUser(user) {
-    // setNewUser({
-    //   Org_Id: user.Org_Id,
-    //   Method_Name: "Update",
-    //   Login_User_Id: user.Login_User_Id,
-    //   UserType_Id: user.UserType_Id,
-    //   User_Name: user.Is_Employee === 1 ? "" : user.Login_User_Id,
-    //   User_Id: parseInt(user.User_Id),
-    //   User_Password: user.Is_Employee === 1 ? "" : user.User_Password,
-    //   Employee_Id: user.Employee_Id,
-    //   User_Display_Name: user.Is_Employee === 1 ? "" : user.User_Name,
-    //   Role_Id: user.Role_Id,
-    //   Is_Employee: user.Is_Employee,
-    //   Designation: user.Designation,
-    //   Mobile: user.Mobile,
-    //   Landline: user.Landline,
-    //   Email: user.Is_Employee === 1 ? "" : user.Email,
-    //   Is_Active: user.Is_Active,
-    // });
-    setNewBGTransactionEntry({});
+  const handleSearchUser = async () => {
+    try {
+      const data = {
+        BGNo: searchInput ? searchInput : '',
+        Action: action ? action : ''
+      }
+      const result = await RestfullApiService(data, 'user/GetBGTransactionsCreateBG');
+      setUserInfo(result?.Result?.Table1);
+    } catch (error) {
+
+    }
   }
+
+  async function handleEditUser(user) {
+    try {
+
+      const data = {
+        BG_ID: user?.BG_ID
+      }
+      const result = await RestfullApiService(data, 'user/GetSingleBGTransctionDataByID')
+      const val = result?.Result?.Table1[0];
+      setNewBGTransactionEntry({
+        ...newBGTransactionEntry,
+        Entity: '',
+        Entity_Id: val?.EntityId,
+        Bank_Name: '',
+        Bank_Name_Id: val?.BankId,
+        Bank_Branch: '',
+        Bank_Branch_Id: val?.BankBranchId,
+        BG_No: val?.BG_No,
+        Issued_To: val?.SegmentId,
+        Purpose: val?.Purpose_ID,
+        BG_Amt: val?.BGAmt,
+        Effective_Date: val?.EffectiveDate?.slice(0, 10),
+        Expiry_Date: val?.ExpiryDate?.slice(0, 10),
+        Withdrawal_Date: val?.WithdrawalDate?.slice(0, 10),
+        Status: val?.Status,
+        Tenure: val?.TenureInDays,
+        Rating_Recd: val?.RatingRecd,
+        FD_Amt: val?.FDAmt,
+        Debit_Account_No: val?.DebitAccountNo,
+        Commission: val?.Commission,
+        Commission_Charges: val?.CommissionCharges,
+        GST_Amt: val?.GSTAmt,
+        Other_Charges: val?.OtherCharges,
+        Total_Charges: val?.TotalCharges,
+        BG_Scan_Upload: val?.BG_ScanCopyUpload,
+        Invoice_Copy: val?.GSTInvoiceCopy,
+        BG_Replication_count: '',
+        Approved_Reject_Reason: val?.ApprovedRejectReason,
+        Prematured_BG_Rate: val?.PreMaturedFDRate,
+        Prematurity_Date: val?.PreMaturityDate?.slice(0, 10),
+        Remarks: val?.Remark
+      })
+      console.log(newBGTransactionEntry);
+    } catch (error) {
+
+    }
+  }
+
   async function getEntity() {
     try {
       const result = await RestfullApiService('', 'user/DDLFDTransactionsCoName')
@@ -704,6 +713,7 @@ const CreateBG = ({ props }) => {
     getPurposeList()
     getStatusList()
   }, []);
+
   return (
     <>
       <div className="panel">
@@ -773,7 +783,7 @@ const CreateBG = ({ props }) => {
                       options={entityList}
                       value={entityList?.find(
                         (option) =>
-                          option.label === newBGTransactionEntry?.Entity
+                          option.value == newBGTransactionEntry?.Entity_Id
                       )}
                       isClearable
                       onChange={(selectedOption) => {
@@ -782,7 +792,7 @@ const CreateBG = ({ props }) => {
                             ...newBGTransactionEntry,
                             Entity: selectedOption?.label,
                             Entity_Id: selectedOption?.value
-                          });
+                          })
                         } else {
                           // Handle the case when the field is cleared
                           setNewBGTransactionEntry({
@@ -822,22 +832,24 @@ const CreateBG = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={bankNames}
-                      defaultValue={bankNames?.find(
+                      value={bankNames?.find(
                         (option) =>
-                          option.value === newBGTransactionEntry?.Bank_Name
+                          option.value === newBGTransactionEntry?.Bank_Name_Id
                       )}
                       isClearable
                       onChange={(selectedOption) => {
                         if (selectedOption) {
                           setNewBGTransactionEntry({
                             ...newBGTransactionEntry,
-                            Bank_Name: selectedOption.value,
+                            Bank_Name: selectedOption.label,
+                            Bank_Name_Id: selectedOption.value
                           });
                         } else {
                           // Handle the case when the field is cleared
                           setNewBGTransactionEntry({
                             ...newBGTransactionEntry,
                             Bank_Name: "",
+                            Bank_Name_Id: 0
                           });
                         }
                         setError({ ...error, Bank_Name: "" });
@@ -873,7 +885,7 @@ const CreateBG = ({ props }) => {
                       options={bankBranches}
                       value={bankBranches?.find(
                         (option) =>
-                          option.label === newBGTransactionEntry?.Bank_Branch
+                          option.value === newBGTransactionEntry?.Bank_Branch_Id
                       )}
                       isClearable
                       onChange={(selectedOption) => {
@@ -947,7 +959,7 @@ const CreateBG = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={issuedTo}
-                      defaultValue={issuedTo?.find(
+                      value={issuedTo?.find(
                         (option) =>
                           option.value === newBGTransactionEntry?.Issued_To
                       )}
@@ -1122,7 +1134,7 @@ const CreateBG = ({ props }) => {
                           setError({ ...error, Expiry_Date: '' })
                           setIsRefreshed(true);
                         }}
-                      // defaultValue={newISINEntry?.From_Date}
+                        value={newBGTransactionEntry?.Expiry_Date}
                       />
                     </div>
 
@@ -1174,9 +1186,9 @@ const CreateBG = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={status}
-                      defaultValue={status?.find(
+                      value={status?.find(
                         (option) =>
-                          option.value === newBGTransactionEntry?.Status
+                          option.label === newBGTransactionEntry?.Status
                       )}
                       isClearable
                       onChange={(selectedOption) => {
@@ -1477,16 +1489,16 @@ const CreateBG = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={bGReplicationCount}
-                      defaultValue={bGReplicationCount?.find(
+                      value={bGReplicationCount?.find(
                         (option) =>
-                          option.value === newBGTransactionEntry.BG_Replication_count
+                          option.value === newBGTransactionEntry?.BG_Replication_count
                       )}
                       isClearable
                       onChange={(selectedOption) => {
                         if (selectedOption) {
                           setNewBGTransactionEntry({
                             ...newBGTransactionEntry,
-                            BG_Replication_count: selectedOption.value,
+                            BG_Replication_count: selectedOption?.value,
                           });
                         } else {
                           // Handle the case when the field is cleared
@@ -1512,8 +1524,8 @@ const CreateBG = ({ props }) => {
                         return inputValue;
                       }}
                     />
-                    {error.BG_Replication_count !== "" && (
-                      <p className="error-validation">{error.BG_Replication_count}</p>
+                    {error?.BG_Replication_count !== "" && (
+                      <p className="error-validation">{error?.BG_Replication_count}</p>
                     )}
                   </div>
                   <div className="col-lg-3 col-md-3  form-group mb-0">
@@ -1538,8 +1550,8 @@ const CreateBG = ({ props }) => {
                       }}
                       maxLength="50"
                     />
-                    {error.Approved_Reject_Reason !== "" && (
-                      <p className="error-validation">{error.Approved_Reject_Reason}</p>
+                    {error?.Approved_Reject_Reason !== "" && (
+                      <p className="error-validation">{error?.Approved_Reject_Reason}</p>
                     )}
                   </div>
 
@@ -1567,9 +1579,9 @@ const CreateBG = ({ props }) => {
                         setIsRefreshed(true);
                       }}
                     />
-                    {error.Prematured_BG_Rate !== "" && (
+                    {error?.Prematured_BG_Rate !== "" && (
                       <p className="error-validation">
-                        {error.Prematured_BG_Rate}
+                        {error?.Prematured_BG_Rate}
                       </p>
                     )}
                   </div>
@@ -1599,7 +1611,7 @@ const CreateBG = ({ props }) => {
                           setError({ ...error, Prematurity_Date: '' })
                           setIsRefreshed(true);
                         }}
-                      // defaultValue={newISINEntry?.From_Date}
+                        value={newBGTransactionEntry?.Prematurity_Date}
                       />
                     </div>
 
@@ -1622,7 +1634,7 @@ const CreateBG = ({ props }) => {
                     id="txtAddSecurityName"
                     placeholder="Remarks"
                     autoComplete="off"
-                    // value={newSellEntry?.Scheme_Name}
+                    value={newBGTransactionEntry?.Remarks}
                     onChange={(e) => {
                       handleTextField(e, "Remarks");
                       // Set isRefreshed to true to indicate unsaved changes
@@ -1673,7 +1685,45 @@ const CreateBG = ({ props }) => {
                               ></p>
                             )}
                           </div>
-                          <div className="col-lg-3 col-md-3">
+                          <div className="col-lg-4 col-md-4  form-group mb-0">
+                            <label
+                              className="form-label-small global-label-tag"
+                              htmlFor="txtSearchSecurity"
+                            >
+                              Action
+                            </label>
+                            <ReactSelect
+                              options={actions}
+                              value={actions?.find(
+                                (option) =>
+                                  option.label == action
+                              )}
+                              isClearable
+                              onChange={(selectedOption) => {
+                                if (selectedOption) {
+                                  setAction(selectedOption?.label)
+                                } else {
+                                  // Handle the case when the field is cleared
+                                  setAction('');
+                                }
+                                // Set isRefreshed to true to indicate unsaved changes
+                                setIsRefreshed(true);
+                              }}
+                              styles={customStyles}
+                              {...props}
+                              onInputChange={(inputValue) => {
+                                if (/[^a-zA-Z\s]/.test(inputValue)) {
+                                  const sanitizedInput = inputValue.replace(
+                                    /[^a-zA-Z\s]/g,
+                                    ""
+                                  );
+                                  return sanitizedInput;
+                                }
+                                return inputValue;
+                              }}
+                            />
+                          </div>
+                          <div className="col-lg-4 col-md-4">
                             <button
                               className="btn btn-sm btn-default transition-3d-hover SearchButton"
                               style={{ height: "calc(1.47em + 1rem + 2px)" }}
@@ -1695,6 +1745,8 @@ const CreateBG = ({ props }) => {
                             setAddUser={setAddUser}
                             setIsEdit={setIsEdit}
                             handleDeleteUser={handleDeleteUser}
+                            action={action}
+                            searchInput={searchInput}
                           />
                         </div>
                       </div>

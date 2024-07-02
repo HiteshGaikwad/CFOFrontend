@@ -6,14 +6,16 @@ import {
   useSortBy,
 } from "react-table";
 import { FaRegEdit } from "react-icons/fa";
-import DeleteButton from "../../config/DeleteButton";
+import DeleteButton from "../../../../../config/DeleteButton";
+import { BASE_URL } from "../../../../../config/url";
 
-const BuyEntryGrid = ({
+const SellEntryGrid = ({
   userInfo,
   handleEditUser,
   handleDeleteUser,
   setAddUser,
   setIsEdit,
+  searchInput
 }) => {
   const columns = useMemo(
     () => [
@@ -25,58 +27,59 @@ const BuyEntryGrid = ({
         minWidth: 80,
       },
       {
-        Header: "Buy Entry ID",
-        accessor: "",
+        Header: "Sell Entry ID",
+        accessor: "ID",
         width: 300,
         minWidth: 120,
       },
       {
-        Header: "Purchase Type",
-        accessor: "",
+        Header: "Type",
+        accessor: "Type",
         width: 300,
         minWidth: 150,
       },
       {
-        Header: "Rebalancing Co Name",
-        accessor: "",
+        Header: "ISIN",
+        accessor: "ISIN",
         width: 500,
         minWidth: 200,
       },
       {
         Header: "Co Name",
-        accessor: "",
+        accessor: `${'Co name'}`,
         width: 200,
         minWidth: 120,
       },
       {
-        Header: "Investment Date",
-        accessor: "",
+        Header: "Redemption Date",
+        accessor: `${"Redemption Date"}`,
+        Cell: ({ value }) => value ? value.slice(0, 10) : '',
         width: 300,
         minWidth: 150,
       },
       {
         Header: "Scheme Name",
-        accessor: "",
+        accessor: `${"Scheme Name"}`,
         width: 350,
         minWidth: 200,
       },
       {
         Header: "Units",
-        accessor: "",
+        accessor: "Units",
         width: 200,
         minWidth: 100,
       },
       {
-        Header: "Purchase Cost",
-        accessor: "",
+        Header: "Balance Units",
+        accessor: `${'Balance Units'}`,
         width: 300,
         minWidth: 150,
       },
       {
-        Header: "DPID/Folio Number",
-        accessor: "",
+        Header: "Sell Nav",
+        accessor: `${'Sell NAV'}`,
         width: 500,
-        minWidth: 200,
+        minWidth: 100,
       },
       {
         Header: "Actions",
@@ -152,20 +155,18 @@ const BuyEntryGrid = ({
   };
 
   // Function to download CSV file
-  const downloadCSV = () => {
-    const csvContent = convertToCSV();
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "BuyEntry-Data.csv");
-      link.style.visibility = "hidden";
+  const downloadCSV = async () => {
+    try {
+      const url = `${BASE_URL}user/DownloadMFSellEntry?ID=${searchInput ? searchInput : 0}`;
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'employee-details-master.xlsx');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    } catch (error) {
     }
-  };
+  }
 
   return (
     <div className="city-table-container" style={{ position: "relative" }}>
@@ -174,7 +175,7 @@ const BuyEntryGrid = ({
           display: "flex",
           justifyContent: "end",
         }}
-        // className="custom-export-button"
+      // className="custom-export-button"
       >
         <button onClick={downloadCSV} className="custom-export-button">
           EXPORT
@@ -294,11 +295,10 @@ const BuyEntryGrid = ({
                       >
                         {column.isSorted ? (
                           <i
-                            className={`fa-solid ${
-                              column.isSortedDesc
-                                ? "fa-arrow-down"
-                                : "fa-arrow-up"
-                            }`}
+                            className={`fa-solid ${column.isSortedDesc
+                              ? "fa-arrow-down"
+                              : "fa-arrow-up"
+                              }`}
                             style={{ color: "gray" }}
                           ></i>
                         ) : (
@@ -391,7 +391,7 @@ const BuyEntryGrid = ({
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <div>
+          {/* <div>
             {Array.from(
               { length: Math.min(10, pageOptions.length) },
               (_, i) => {
@@ -402,9 +402,8 @@ const BuyEntryGrid = ({
                     onClick={() => {
                       gotoPage(i);
                     }}
-                    className={`btn btn-sm btn-default transition-3d-hover SearchButton ${
-                      pageIndex === i ? "active" : ""
-                    }`}
+                    className={`btn btn-sm btn-default transition-3d-hover SearchButton ${pageIndex === i ? "active" : ""
+                      }`}
                     style={{
                       height: "calc(1.47em + 1rem + 2px)",
                       marginLeft: "5px",
@@ -417,7 +416,7 @@ const BuyEntryGrid = ({
                 );
               }
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}
@@ -433,4 +432,4 @@ const BuyEntryGrid = ({
   );
 };
 
-export default BuyEntryGrid;
+export default SellEntryGrid;

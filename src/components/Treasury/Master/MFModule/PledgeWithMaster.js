@@ -13,10 +13,10 @@ const PledgeWithMaster = ({ props }) => {
   const [initialFieldValues, setInitialFieldValues] = useState({});
 
   const [pledgeWith, setPledgeWith] = useState("");
-  const [pledgeWithId,setPledgeWithId] = useState('')
+  const [pledgeWithId, setPledgeWithId] = useState('')
   const [error, setError] = useState("");
 
-  const userData= getUserDataFromStorage()
+  const userData = getUserDataFromStorage()
 
   // search user data
   async function handleSearch() {
@@ -25,11 +25,11 @@ const PledgeWithMaster = ({ props }) => {
 
       let data = {
         PledgeWithId: 0,
-        BankNameExchange: searchInput?searchInput:""
+        BankNameExchange: searchInput ? searchInput : ""
       }
       const result = await RestfullApiService(data, "user/GetMFPledgeWith");
       setUserInfo(result.Result?.Table1);
-    } catch (error) {}
+    } catch (error) { }
   }
 
   useEffect(() => {
@@ -96,8 +96,8 @@ const PledgeWithMaster = ({ props }) => {
 
       // If no validation errors, proceed to save
       if (error !== "") {
-        const data={
-          PledgeWithId: pledgeWithId?pledgeWithId:0,
+        const data = {
+          PledgeWithId: pledgeWithId ? pledgeWithId : 0,
           BankNameExchange: pledgeWith,
           CreatedBy: userData?.EmpId
         }
@@ -150,7 +150,7 @@ const PledgeWithMaster = ({ props }) => {
     let notify;
     try {
       let data = {
-        PledgeWithId:user?.PledgeWithId
+        PledgeWithId: user?.PledgeWithId
       };
       // API call
       const result = await RestfullApiService(data, "user/DeleteMFPledgeWith");
@@ -159,7 +159,7 @@ const PledgeWithMaster = ({ props }) => {
       }
       handleSearch();
       notify();
-    } catch (error) {}
+    } catch (error) { }
   };
 
   function handleEditUser(user) {
@@ -300,6 +300,7 @@ const PledgeWithMaster = ({ props }) => {
                             setAddPledgeWith={setAddPledgeWith}
                             setIsEdit={setIsEdit}
                             handleDeleteUser={handleDeleteUser}
+                            searchInput={searchInput}
                           />
                         </div>
                       </div>

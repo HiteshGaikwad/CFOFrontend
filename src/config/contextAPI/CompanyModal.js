@@ -76,7 +76,6 @@ const CompanyModal = () => {
         const formData = new FormData();
         formData.append("File", file);
         formData.append("UserID", userData?.EmpID);
-        debugger
         try {
             if (file) {
                 let token;

@@ -303,6 +303,7 @@ const MfCompanyMaster = ({ props }) => {
                             setAddCompanyMaster={setAddCompanyMaster}
                             setIsEdit={setIsEdit}
                             handleDeleteUser={handleDeleteUser}
+                            searchInput={searchInput}
                           />
                         </div>
                       </div>

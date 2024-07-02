@@ -24,7 +24,7 @@ const ISINData = {
   From_Date: "",
   Nature: "",
   Scheme_Name: "",
-  ISINId:0
+  ISINId: 0
 };
 const customStyles = {
   control: (provided, state) => ({
@@ -92,13 +92,13 @@ const ISINMaster = ({ props }) => {
   // };
 
   // search user data
-  
+
   async function handleSearchUser() {
     try {
       setError({});
 
       let data = {
-        ISIN: searchInput?searchInput:''
+        ISIN: searchInput ? searchInput : ''
       };
       const result = await RestfullApiService(data, "user/GetMFISIN");
       setUserInfo(result?.Result?.Table1);
@@ -227,7 +227,7 @@ const ISINMaster = ({ props }) => {
   }
 
   const handleDeleteUser = async (user) => {
-    let notify ;
+    let notify;
     try {
       let data = {
         ISINId: user?.ISINId
@@ -244,21 +244,21 @@ const ISINMaster = ({ props }) => {
 
   async function handleEditUser(user) {
     try {
-      const data={
+      const data = {
         ISINId: user?.ISINId?.toString()
       }
-      const result= await RestfullApiService(data,'user/GetSingleMFISINByID')
-      const val= result?.Result?.Table1[0];
+      const result = await RestfullApiService(data, 'user/GetSingleMFISINByID')
+      const val = result?.Result?.Table1[0];
       setNewISINEntry({
         ...newISINEntry,
-        From_Date: val?.Fromdate?.slice(0,10),
+        From_Date: val?.Fromdate?.slice(0, 10),
         ISIN: val?.ISIN,
         Nature: val?.NATURE,
         Scheme_Name: val?.SchemeName,
         ISINId: user?.ISINId
       })
     } catch (error) {
-      
+
     }
   }
 
@@ -402,14 +402,15 @@ const ISINMaster = ({ props }) => {
                           borderRadius: "3px",
                           padding: "0px 8px",
                         }}
-                        onChange={(e) => 
-                          { setNewISINEntry({ ...newISINEntry, From_Date: (e.target.value) }) ;
-                        setError((prevErrors) => ({
-                        ...prevErrors,
-                        From_Date: "",
-                            }))}
-                          }
-                      value={newISINEntry?.From_Date}
+                        onChange={(e) => {
+                          setNewISINEntry({ ...newISINEntry, From_Date: (e.target.value) });
+                          setError((prevErrors) => ({
+                            ...prevErrors,
+                            From_Date: "",
+                          }))
+                        }
+                        }
+                        value={newISINEntry?.From_Date}
                       />
                     </div>
 
@@ -538,6 +539,7 @@ const ISINMaster = ({ props }) => {
                             setAddUser={setAddUser}
                             setIsEdit={setIsEdit}
                             handleDeleteUser={handleDeleteUser}
+                            searchInput={searchInput}
                           />
                         </div>
                       </div>

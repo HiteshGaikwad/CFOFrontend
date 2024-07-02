@@ -60,8 +60,11 @@ const EmployeeDetails = ({ ...props }) => {
   const [error, setError] = useState({});
   const [isRefreshed, setIsRefreshed] = useState(false);
   const [initialFieldValues, setInitialFieldValues] = useState({});
+  const [sticky, setSticky] = useState(false);
 
   const [businessUnit, setBusinessUnit] = useState([]);
+  const [scrolledUp, setScrolledUp] = useState(false);
+
   const userData = getUserDataFromStorage()
 
   const user = {
@@ -352,7 +355,6 @@ const EmployeeDetails = ({ ...props }) => {
     if (selectedItem.id === '-1') {
       setSelectedOptions(businessUnit);
     } else {
-      debugger
       setSelectedOptions(selectedList);
     }
   };
@@ -370,11 +372,12 @@ const EmployeeDetails = ({ ...props }) => {
     }
   };
 
+
   return (
     <>
       <div className="panel">
         <div className="panel-hdr">
-          <h2>{!addUser ? "Employee Details" : "Add Employee"} </h2>
+          <h2>{!addUser ? "Employee Details" : "Update Employee"} </h2>
           {!addUser ? (
             <div className="panel-toolbar">
               {/* <button
@@ -423,7 +426,7 @@ const EmployeeDetails = ({ ...props }) => {
           )}
         </div>
         <div className="panel-container show">
-          <div className="panel-content">
+          <div className="panel-content ">
             {addUser ? (
 
               <>
@@ -608,7 +611,7 @@ const EmployeeDetails = ({ ...props }) => {
                 <div className="row">
                   <div id="divSearch" className="col-lg-12 col-md-12">
                     <div className="panel-container show">
-                      <div className="panel-content">
+                      <div className="panel-content table-contain" >
                         <div className="row">
                           <div className="col-lg-3 col-md-3 ">
                             <label
@@ -654,7 +657,7 @@ const EmployeeDetails = ({ ...props }) => {
                           </div>
                         </div>
 
-                        <div className="table-responsive table-wrap watchlist-table tblheight mt-0">
+                        <div className={sticky ? 'sticky-on' : '' + " table-responsive table-wrap watchlist-table tblheight mt-0"} >
                           <UserMasterGrid
                             searchInput={searchInput}
                             userInfo={userInfo}

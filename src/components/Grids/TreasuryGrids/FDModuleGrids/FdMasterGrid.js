@@ -114,7 +114,7 @@ const FdMasterGrid = ({
     if (link.download !== undefined) {
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
-      link.setAttribute("download", "FDMaster-Data.csv");
+      link.setAttribute("download", "FDComoon-Master.csv");
       link.style.visibility = "hidden";
       document.body.appendChild(link);
       link.click();
@@ -129,7 +129,7 @@ const FdMasterGrid = ({
           display: "flex",
           justifyContent: "end",
         }}
-        // className="custom-export-button"
+      // className="custom-export-button"
       >
         <button onClick={downloadCSV} className="custom-export-button">
           EXPORT
@@ -248,11 +248,10 @@ const FdMasterGrid = ({
                     >
                       {column.isSorted ? (
                         <i
-                          className={`fa-solid ${
-                            column.isSortedDesc
-                              ? "fa-arrow-down"
-                              : "fa-arrow-up"
-                          }`}
+                          className={`fa-solid ${column.isSortedDesc
+                            ? "fa-arrow-down"
+                            : "fa-arrow-up"
+                            }`}
                           style={{ color: "gray" }}
                         ></i>
                       ) : (
@@ -345,7 +344,7 @@ const FdMasterGrid = ({
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <div>
+          {/* <div>
             {Array.from(
               { length: Math.min(10, pageOptions.length) },
               (_, i) => {
@@ -356,9 +355,8 @@ const FdMasterGrid = ({
                     onClick={() => {
                       gotoPage(i);
                     }}
-                    className={`btn btn-sm btn-default transition-3d-hover SearchButton ${
-                      pageIndex === i ? "active" : ""
-                    }`}
+                    className={`btn btn-sm btn-default transition-3d-hover SearchButton ${pageIndex === i ? "active" : ""
+                      }`}
                     style={{
                       height: "calc(1.47em + 1rem + 2px)",
                       marginLeft: "5px",
@@ -371,7 +369,7 @@ const FdMasterGrid = ({
                 );
               }
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}

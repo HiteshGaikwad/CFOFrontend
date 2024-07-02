@@ -21,19 +21,18 @@ export async function RestfullApiService(data, endPoint) {
   return result;
 }
 
-export async function saveUserHistory(data, endPoint){
+export async function saveUserHistory(data, endPoint) {
   try {
-    // debugger
-    const result= await RestfullApiService(data,endPoint);
+    const result = await RestfullApiService(data, endPoint);
   } catch (error) {
   }
-    }
+}
 // parameters to saveuserHistory API
-    // const val={
-    //   EmployeeCode: userData?.EmpID,
-    //   Activity: "Record Inserted in RPT Company Master - A/C Code: " + newRPTCompanyMaster?.Account_Code?.toUpperCase() + " By " + userData?.FullName,
-    //   PageUrl: window.location.pathname,
-    //   TableName: "RPT Company Master",
-    //   ActionFor: newRPTCompanyMaster?.Account_Code?.toUpperCase(),
-    //   ipaddress: ip
-    // }
+// const val={
+//   EmployeeCode: userData?.EmpID,
+//   Activity: "Record Inserted in RPT Company Master - A/C Code: " + newRPTCompanyMaster?.Account_Code?.toUpperCase() + " By " + userData?.FullName,
+//   PageUrl: window.location.pathname,
+//   TableName: "RPT Company Master",
+//   ActionFor: newRPTCompanyMaster?.Account_Code?.toUpperCase(),
+//   ipaddress: ip
+// }

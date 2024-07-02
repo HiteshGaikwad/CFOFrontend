@@ -8,6 +8,7 @@ import {
 import { FaRegEdit } from "react-icons/fa";
 import DeleteButton from "../../../../../config/DeleteButton";
 import excelLogo from '../../../../../assets/images/excel-logo.svg'
+import { BASE_URL } from "../../../../../config/url";
 
 const CreateBGGrid = ({
     userInfo,
@@ -15,8 +16,9 @@ const CreateBGGrid = ({
     handleDeleteUser,
     setAddUser,
     setIsEdit,
+    action,
+    searchInput
 }) => {
-    console.log(userInfo);
     const columns = useMemo(
         (item) => [
             {
@@ -29,12 +31,12 @@ const CreateBGGrid = ({
             {
                 Header: "Entity",
                 accessor: "Entity",
-                width: 300,
-                minWidth: 200,
+                width: 120,
+                minWidth: 120,
             },
             {
                 Header: "Bank",
-                accessor: "BankName",
+                accessor: "Bank",
                 width: 300,
                 minWidth: 120,
             },
@@ -46,13 +48,13 @@ const CreateBGGrid = ({
             },
             {
                 Header: "BG Amt",
-                accessor: "BG_Amt",
+                accessor: "BGAmt",
                 width: 200,
                 minWidth: 120,
             },
             {
                 Header: "Issued To",
-                accessor: "Segement",
+                accessor: "IssuedTo",
                 width: 100,
                 minWidth: 100,
             },
@@ -65,26 +67,40 @@ const CreateBGGrid = ({
             {
                 Header: "Effective Date",
                 accessor: "EffectiveDate",
-                width: 200,
-                minWidth: 100,
+                Cell: ({ value }) => value ? value.slice(0, 10) : '',
+                width: 150,
+                minWidth: 150,
             },
             {
                 Header: "Expiry Date",
                 accessor: "ExpiryDate",
-                width: 200,
-                minWidth: 100,
+                Cell: ({ value }) => value ? value.slice(0, 10) : '',
+                width: 150,
+                minWidth: 150,
             },
             {
                 Header: "Tenure",
-                accessor: "TenureInDays",
+                accessor: "Tenure",
                 width: 200,
                 minWidth: 100,
             },
             {
                 Header: "Commission %",
                 accessor: "Commission",
-                width: 200,
+                width: 130,
+                minWidth: 130,
+            },
+            {
+                Header: "Status",
+                accessor: "Status",
+                width: 100,
                 minWidth: 100,
+            },
+            {
+                Header: "Action",
+                accessor: "Action",
+                width: 180,
+                minWidth: 180,
             },
 
             {
@@ -131,25 +147,25 @@ const CreateBGGrid = ({
                 minWidth: 100,
                 headerClassName: "header-center",
             },
-            {
-                Header: "Donwload",
-                disableSortBy: true,
-                Cell: ({ row }) => (
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <button style={{ border: 'none' }}>
-                            <img
-                                src={excelLogo}
-                                alt="excel file logo"
-                                title="Excel file "
-                                style={{ width: "30px" }}
-                            />
-                        </button>
-                    </div>
-                ),
-                accessor: "",
-                width: 100,
-                minWidth: 100,
-            },
+            // {
+            //     Header: "Donwload",
+            //     disableSortBy: true,
+            //     Cell: ({ row }) => (
+            //         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            //             <button style={{ border: 'none' }}>
+            //                 <img
+            //                     src={excelLogo}
+            //                     alt="excel file logo"
+            //                     title="Excel file "
+            //                     style={{ width: "30px" }}
+            //                 />
+            //             </button>
+            //         </div>
+            //     ),
+            //     accessor: "",
+            //     width: 100,
+            //     minWidth: 100,
+            // },
         ],
         []
     );
@@ -193,20 +209,18 @@ const CreateBGGrid = ({
     };
 
     // Function to download CSV file
-    const downloadCSV = () => {
-        const csvContent = convertToCSV();
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "CreateFD-Data.csv");
-            link.style.visibility = "hidden";
+    const downloadCSV = async () => {
+        try {
+            const url = `${BASE_URL}user/DownloadCreateBG?BGNo=${searchInput ? searchInput : 0}&Action=${action}`;
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'employee-details-master.xlsx');
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        } catch (error) {
         }
-    };
+    }
 
     return (
         <div className="city-table-container" style={{ position: "relative" }}>
@@ -432,7 +446,7 @@ const CreateBGGrid = ({
                             {pageIndex + 1} of {pageOptions.length}
                         </strong>{" "}
                     </span>
-                    <div>
+                    {/* <div>
                         {Array.from(
                             { length: Math.min(10, pageOptions.length) },
                             (_, i) => {
@@ -457,7 +471,7 @@ const CreateBGGrid = ({
                                 );
                             }
                         )}
-                    </div>
+                    </div> */}
                     <button
                         onClick={() => nextPage()}
                         disabled={!canNextPage}

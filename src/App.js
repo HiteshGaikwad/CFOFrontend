@@ -29,8 +29,6 @@ import "./styles/css/google/translate.css";
 import "./styles/css/dragDrop.css";
 import { ModalProvider } from "./config/modalContext";
 
-import BuyEntry from "./components/BuyEntry";
-import SellEntry from "./components/SellEntry";
 import CreateFD from "./components/Treasury/Transaction/FDModule/CreateFD";
 import UploadPanDetails from "./components/RPT/UploadPanDetails";
 import RelationMaster from "./components/RPT/RelationMaster";
@@ -54,6 +52,26 @@ import CreateBG from './components/Treasury/Transaction/BGModule/CreateBG';
 import { MenuProvider } from './config/menuContext';
 import { CompanyProvider } from './config/contextAPI/companyContext';
 import { UploadProvider } from "./config/contextAPI/uploadModalContext";
+import FDReport from './components/Treasury/Reports/FD Module/FDReport';
+import BGRenewLiquidation from './components/Treasury/Transaction/BGModule/BGRenewLiquidation';
+import FDBulkUpload from './components/Treasury/Transaction/FDModule/FDBulkUpload';
+import UpdateNavFromDate from './components/Treasury/Transaction/MFModule/UpdateNavFromDate';
+import UpdateSchemeName from './components/Treasury/Transaction/MFModule/UpdateSchemeName';
+import UpdateAifNav from './components/Treasury/Transaction/MFModule/UpdateAifNav';
+import SellEntry from './components/Treasury/Transaction/MFModule/SellEntry';
+import BuyEntry from './components/Treasury/Transaction/MFModule/BuyEntry';
+import FDDailyInterestReport from './components/Treasury/Reports/FD Module/FDDailyInterestReport';
+import FDOnScreenReport from './components/Treasury/Reports/FD Module/FDOnScreenReport';
+import TDSEntriesReport from './components/Treasury/Reports/FD Module/TDSEntriesReport';
+import FDInterestReport from './components/Treasury/Reports/FD Module/FDInterestReport';
+import MFSummaryReport from './components/Treasury/Reports/MF Module/MFSummaryReport';
+import MFPledgeDetailsReport from './components/Treasury/Reports/MF Module/MFPledgeDetailsReport';
+import MFTransactionReport from './components/Treasury/Reports/MF Module/MFTransactionReport';
+import MFTransactionSummeryReport from './components/Treasury/Reports/MF Module/MFTransactionSummeryReport';
+import BGReport from './components/Treasury/Reports/BG Module/BGReport';
+import BGCommissionReport from './components/Treasury/Reports/BG Module/BGCommissionReport';
+import BuySellBulkUpload from './components/Treasury/Transaction/MFModule/BuySellBulkUpload';
+import BGBulkUpload from './components/Treasury/Transaction/BGModule/BGBulkUpload';
 
 
 // import { Provider } from "react-redux";
@@ -84,17 +102,6 @@ const appLayout = createBrowserRouter([
         path: "Admin/MenuAccess",
         element: <MenuAccess />,
       },
-
-      // Treasury/Transaction/MF module
-      {
-        path: "BuyEntry",
-        element: <BuyEntry />,
-      },
-      {
-        path: "SellEntry",
-        element: <SellEntry />,
-      },
-
 
       // treasury/Master/FDModule
       {
@@ -133,13 +140,100 @@ const appLayout = createBrowserRouter([
         path: "Treasury/Transcations/FDRenewLiquidation",
         element: <FDRenewLiquidation />,
       },
+      {
+        path: "Treasury/Transcations/FDBulkUpload",
+        element: <FDBulkUpload />,
+      },
 
       // Treasury/Transcation/BG module
       {
         path: "Treasury/Transcations/CreateBG",
         element: <CreateBG />,
       },
+      {
+        path: "Treasury/Transcations/BGRenewLiquidation",
+        element: <BGRenewLiquidation />,
+      },
+      {
+        path: "Treasury/Transcations/BGBulkUpload",
+        element: <BGBulkUpload />,
+      },
 
+      // Treasury/Transcation/MF module
+      {
+        path: "Treasury/Transcations/UpdateFromDate",
+        element: <UpdateNavFromDate />,
+      },
+      {
+        path: "Treasury/Transcations/UpdateScheme",
+        element: <UpdateSchemeName />,
+      },
+      {
+        path: "Treasury/Transcations/UpdateAIFNav",
+        element: <UpdateAifNav />,
+      },
+      {
+        path: "Treasury/Transcations/BuyEntry",
+        element: <BuyEntry />,
+      },
+      {
+        path: "Treasury/Transcations/SellEntry",
+        element: <SellEntry />,
+      },
+      {
+        path: "Treasury/Transcations/MFBuySellBulkUpload",
+        element: <BuySellBulkUpload />,
+      },
+
+      // Treasury/Transcation/Report FD
+      {
+        path: "Treasury/Reports/FDReport",
+        element: <FDReport />,
+      },
+      {
+        path: "Treasury/Reports/FDDailyInterestReport",
+        element: <FDDailyInterestReport />,
+      },
+      {
+        path: "Treasury/Reports/FDInterestReport",
+        element: <FDInterestReport />,
+      },
+      {
+        path: "Treasury/Reports/FDOnScreenReport",
+        element: <FDOnScreenReport />,
+      },
+      {
+        path: "Treasury/Reports/TDSEntriesReport",
+        element: <TDSEntriesReport />,
+      },
+
+      // Treasury/Transcation/Report BG
+      {
+        path: "Treasury/Reports/BGReport",
+        element: <BGReport />,
+      },
+      {
+        path: "Treasury/Reports/BGCommissionReport",
+        element: <BGCommissionReport />,
+      },
+
+      // Treasury/Transcation/Report MF
+      {
+        path: "Treasury/Reports/MFSummeryReport",
+        element: <MFSummaryReport />,
+      },
+      {
+        path: "Treasury/Reports/MFPledgeDetailsReport",
+        element: <MFPledgeDetailsReport />,
+      },
+      {
+        path: "Treasury/Reports/MFTransactionReport",
+        element: <MFTransactionReport />,
+      },
+      {
+        path: "Treasury/Reports/MFTransactionSummeryReport",
+        element: <MFTransactionSummeryReport />,
+      },
       // RPT
       {
         path: "RPTCompanyMaster",

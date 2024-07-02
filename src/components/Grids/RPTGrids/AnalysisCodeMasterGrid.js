@@ -9,6 +9,7 @@ import { FaRegEdit } from "react-icons/fa";
 import DeleteButton from "../../.././config/DeleteButton";
 import { RestfullApiService } from "../../../config/Api's";
 import { BASE_URL } from "../../../config/url";
+import { getUserDataFromStorage } from "../../../config/service";
 
 const AnalysisCodeMasterGrid = ({
   searchInput,
@@ -18,6 +19,7 @@ const AnalysisCodeMasterGrid = ({
   setAddAnalysisCode,
   setIsEdit,
 }) => {
+  const userData = getUserDataFromStorage();
   const columns = useMemo(
     () => [
       {
@@ -65,10 +67,13 @@ const AnalysisCodeMasterGrid = ({
                 borderRadius: "18px",
                 margin: "0px 13px",
               }}
+
               onClick={() => {
-                handleEditUser(row.original);
-                setAddAnalysisCode(true);
-                setIsEdit(true);
+                if (userData?.Role === "Maker") {
+                  handleEditUser(row.original);
+                  setAddAnalysisCode(true);
+                  setIsEdit(true);
+                }
               }}
             >
               <FaRegEdit style={{ color: "#EB6400", fontSize: "18px" }} />
@@ -355,7 +360,7 @@ const AnalysisCodeMasterGrid = ({
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <div>
+          {/* <div>
             {Array.from(
               { length: Math.min(10, pageOptions.length) },
               (_, i) => {
@@ -380,7 +385,7 @@ const AnalysisCodeMasterGrid = ({
                 );
               }
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}

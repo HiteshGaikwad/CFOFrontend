@@ -1,9 +1,76 @@
 import React, { useEffect, useState } from "react";
-import { RestfullApiService } from "../config/Api's";
+import { RestfullApiService } from "../../../../config/Api's";
 import { toast } from "react-toastify";
 import ReactSelect from "react-select";
-import BuyEntryGrid from "./Grids/BuyEntryGrid";
+import { getUserDataFromStorage } from "../../../../config/service";
+import BuyEntryGrid from "../../../Grids/TreasuryGrids/Transaction/MFModuleGrids/BuyEntryGrid";
 
+const entryType = [
+  {
+    label: 'Equity',
+    value: '0'
+  },
+  {
+    label: 'Liquid',
+    value: '1'
+  },
+  {
+    label: 'AIF',
+    value: '2'
+  },
+]
+const purchaseType = [
+  {
+    label: 'Rebalancing',
+    value: '0'
+  },
+  {
+    label: 'Fresh',
+    value: '1'
+  },
+  {
+    label: 'Reinvestment',
+    value: '2'
+  },
+]
+const typeOfInvestment = [
+  {
+    label: 'Sponser Commitment',
+    value: '0'
+  },
+  {
+    label: 'Treasury Investment',
+    value: '1'
+  },
+  {
+    label: 'Client Investment',
+    value: '2'
+  },
+]
+const statusOfPledge = [
+  {
+    label: 'Pledge',
+    value: '1'
+  },
+  {
+    label: 'Free for Pledge',
+    value: '2'
+  },
+]
+const typeOfLienAvailed = [
+  {
+    label: 'EOD Value',
+    value: '1'
+  },
+  {
+    label: 'Intra day',
+    value: '2'
+  },
+  {
+    label: 'Both Value',
+    value: '3'
+  },
+]
 const BuyEntry = ({ props }) => {
   const [searchInput, setSearchInput] = useState("");
   const [userInfo, setUserInfo] = useState([]);
@@ -13,23 +80,24 @@ const BuyEntry = ({ props }) => {
   const [isRefreshed, setIsRefreshed] = useState(false);
   const [initialFieldValues, setInitialFieldValues] = useState({});
 
-  const [purchaseType, setPurchaseType] = useState([]);
-  const [entryType, setEntryType] = useState([]);
   const [reblancingCoName, setReblancingCoName] = useState([]);
   const [coName, setCoName] = useState([]);
-  const [typeOfInvestment, setTypeOfInvestment] = useState([]);
-  const [statusOfPledge, setStatusOfPledge] = useState([]);
   const [pledgeWith, setPledgeWith] = useState([]);
-  const [typeOfLienAvailed, setTypeOfLienAvailed] = useState([]);
+  const [schemeName, setSchemeName] = useState([]);
+
+  const userData = getUserDataFromStorage()
 
   const BuyEntryData = {
+    ID: 0,
     Type: "",
     Purchase_Type: "",
-    Rebalancing_Co_Name: "",
+    Rebalancing_Co_Name: 0,
     Co_Name: "",
+    CoID: '',
     Type_Of_Investment: "",
     Investment_Date: "",
     ISIN: "",
+    ISINId: '',
     Units: "",
     Purchase_Cost: "",
     DPID_Folio_Number: "",
@@ -48,18 +116,11 @@ const BuyEntry = ({ props }) => {
     Rebalancing_Co_Name: "",
     Co_Name: "",
     Type_Of_Investment: "",
-    Investment_Date: "",
     ISIN: "",
     Units: "",
-    Purchase_Cost: "",
-    DPID_Folio_Number: "",
-    Status_Of_Pledge: "",
-    Number_Of_Units: "",
     Pledge_With: "",
     Type_Of_Lien_Availed: "",
-    Fund_Code: "",
     Scheme_Name: "",
-    Remark: "",
   };
 
   const customStyles = {
@@ -89,23 +150,31 @@ const BuyEntry = ({ props }) => {
     }),
   };
 
-  const handleDateChange = (date) => {
+  const handleDateChange = () => {
     // If a date is selected, generate the current time and combine it with the selected date
 
+    const datestr = new Date();
+    let d = (datestr.getDate()).toString();
+    let m = (datestr.getMonth() + 1).toString();
+    const y = datestr.getFullYear();
+    m = (m.length < 2) ? ('0' + m) : m;
+    d = (d.length < 2) ? ('0' + d) : d;
     let currentDate = "";
     currentDate +=
-      date.slice(8, 10) + "-" + date.slice(5, 7) + "-" + date.slice(0, 4);
+      y + "/" + m + "/" + d;
 
-    setNewBuyEntry({
-      ...newBuyEntry,
-      Investment_Date: currentDate,
-      // Read_Date: currentDate,
-    });
-    setError((prevErrors) => ({
-      ...prevErrors,
-      Investment_Date: "",
-    }));
+    return currentDate;
   };
+
+  const handleDateFormat = (date) => {
+    let currentDate;
+    const y = date.slice(6, 10)
+    const m = date.slice(3, 5)
+    const d = date.slice(0, 2)
+    currentDate =
+      y + "-" + m + "-" + d;
+    return currentDate;
+  }
 
   // search user data
   async function handleSearchUser() {
@@ -113,17 +182,329 @@ const BuyEntry = ({ props }) => {
       setError({});
 
       let data = {
-        // Org_Id: userData?.OrgId,
-        // Method_Name: "Get",
-        // Login_User_Id: userData?.UserId,
-        // User_Id: "",
-        // User_Name: searchInput,
+        ID: searchInput ? searchInput : 0
       };
-      const result = await RestfullApiService(data, "master/GetUserMaster");
-      setUserInfo(result.Result);
-    } catch (error) {}
+      const result = await RestfullApiService(data, "user/GetMFBuyEntry");
+      setUserInfo(result?.Result?.Table1);
+    } catch (error) { }
   }
 
+  async function onChangeSchemeName(value) {
+    try {
+      const data = {
+        ISINId: value
+      }
+      const result = await RestfullApiService(data, 'user/GetMFBuyEntryISIN');
+      const isin = result?.Result?.ISINData?.Table1[0]
+      const datestr = JSON.parse(result?.Result?.MaxDateData);
+      let date;
+      if (datestr?.Result === null) {
+        date = handleDateChange()
+      } else {
+        date = datestr?.Result.slice(0, 10)
+      }
+      setNewBuyEntry({
+        ...newBuyEntry,
+        Scheme_Name: value,
+        Investment_Date: date,
+        ISINId: isin?.ISINId,
+        ISIN: isin?.ISIN,
+      });
+      setError({ ...error, ISIN: '' })
+      getNav(isin?.ISIN, date)
+    } catch (error) {
+
+    }
+  }
+
+  async function getNav(isin, date) {
+    try {
+      // const convertedDate = date.slice(8, 10) + '/' + date.slice(5, 7) + '/' + date.slice(0, 4) + 
+      date += 'T00:00:00.000'
+      const data = {
+        UserDate: date,
+        ISIN: isin
+      }
+      const result = await RestfullApiService(data, 'user/GetNAV');
+      const nav_rs = result?.Result?.Table1[0]?.NAV_RS;
+      if (newBuyEntry?.Units) {
+        const n = parseInt(newBuyEntry?.Units)
+        const val = n * nav_rs;
+        setNewBuyEntry({ ...newBuyEntry, Purchase_Cost: val.toFixed(2) })
+      }
+    } catch (error) {
+
+    }
+  }
+
+  // save user data
+  async function handleSaveUser() {
+    let notify = null;
+
+    try {
+      let errors = err;
+      // Function to trim string values
+      const trimValue = (value) => {
+        return typeof value === "string" ? value.trim() : value;
+      };
+
+      // Trim string values in newUser object
+      const trimmedUser = Object.fromEntries(
+        Object.entries(newBuyEntry).map(([key, value]) => [
+          key,
+          trimValue(value),
+        ])
+      );
+      // Update newUser object with trimmed values
+      setNewBuyEntry(trimmedUser);
+      // Perform validation
+      if (newBuyEntry?.Type === "") {
+        errors = { ...errors, Type: "Type is required." };
+      }
+      if (newBuyEntry?.Purchase_Type === "") {
+        errors = { ...errors, Purchase_Type: "Purchase type is required." };
+      }
+      if (newBuyEntry?.Purchase_Type === 'Rebalancing' && newBuyEntry?.Rebalancing_Co_Name === "") {
+        errors = {
+          ...errors,
+          Rebalancing_Co_Name: "Rebalancing co. name is required",
+        };
+      }
+      if (newBuyEntry?.Co_Name === "") {
+        errors = { ...errors, Co_Name: "Co. name is required." };
+      }
+      if (newBuyEntry?.Type_Of_Investment === "") {
+        errors = {
+          ...errors,
+          Type_Of_Investment: "Type Of investment is required.",
+        };
+      }
+      if (newBuyEntry?.ISIN === "") {
+        errors = { ...errors, ISIN: "ISIN is required." };
+      }
+      if (newBuyEntry?.Units === "") {
+        errors = { ...errors, Units: "Units is required." };
+      }
+      if (newBuyEntry?.Scheme_Name === "") {
+        errors = { ...errors, Scheme_Name: "Scheme name is required." };
+      }
+      if (newBuyEntry?.Type_Of_Investment !== 'Sponser Commitment' && newBuyEntry?.Pledge_With === "") {
+        errors = { ...errors, Pledge_With: "Pledge with is required." };
+      }
+      if (newBuyEntry?.Type_Of_Investment !== 'Sponser Commitment' && newBuyEntry?.Type_Of_Lien_Availed === "") {
+        errors = { ...errors, Type_Of_Lien_Availed: "Type Of Lien Availed is required." };
+      }
+
+      setError(errors);
+
+      // Check if there are no validation errors
+      let flag = false;
+      for (const key in errors) {
+        if (errors[key] !== "") {
+          flag = true;
+          break;
+        }
+      }
+
+      // If no validation errors, proceed to save
+      if (!flag) {
+        const data = {
+          ID: newBuyEntry?.ID,
+          Type: newBuyEntry?.Type,
+          PurchaseType: newBuyEntry?.Purchase_Type,
+          ReCoId: (newBuyEntry?.Rebalancing_Co_Name) ? (newBuyEntry?.Rebalancing_Co_Name) : 0,
+          CoId: newBuyEntry?.CoID,
+          TypeOfInvestment: newBuyEntry?.Type_Of_Investment,
+          InvestmentDate: newBuyEntry?.Investment_Date,
+          ISINId: newBuyEntry?.ISINId,
+          Units: newBuyEntry?.Units,
+          PurchaseCost: newBuyEntry?.Purchase_Cost,
+          Remarks: newBuyEntry?.Remark,
+          TransactionType: "Buy",
+          CreatedBy: userData?.EmpCode,
+          SoldReceipt: 0,
+          WeightedAvgCost: 0,
+          FundReceivedDate: null,
+          SellAgainstDate: null,
+          BalanceUnits: 0,
+          SellNAV: 0,
+          DpidFolioNo: newBuyEntry?.DPID_Folio_Number,
+          StatusOfPledge: (newBuyEntry?.Status_Of_Pledge) ? (newBuyEntry?.Status_Of_Pledge) : null,
+          NoOfUnits: (newBuyEntry?.Number_Of_Units) ? (newBuyEntry?.Number_Of_Units) : 0,
+          PledgeWith: (newBuyEntry?.Pledge_With) ? (newBuyEntry?.Pledge_With) : 0,
+          TypeOfLienAvailed: (newBuyEntry?.Type_Of_Lien_Availed) ? (newBuyEntry?.Type_Of_Lien_Availed) : 0,
+          FundCode: newBuyEntry?.Fund_Code
+        }
+        // 0000-00-00T00:00:00.000Z
+        const result = await RestfullApiService(
+          data,
+          "user/SaveMFBuyEntry"
+        );
+        if (result?.Status === 200) {
+          setAddUser(!addUser);
+          notify = () => toast.success(result?.Description);
+        }
+        // Reset newUser object
+
+        // After saving, reset the isRefreshed state to indicate that there are no unsaved changes
+        setIsRefreshed(false);
+        if (isEdit) {
+          setIsEdit(false);
+          handleSearchUser();
+        } else {
+          searchInput && handleSearchUser();
+        }
+        handleSearchUser();
+        // setNewBuyEntry(BuyEntryData);
+      } else {
+        notify = () => toast.error("Mandatory fields should not be empty.");
+      }
+      notify();
+    } catch (error) {
+      // Handle error
+    }
+  }
+
+  const handleTextField = (e, type) => {
+    const inputValue = e.target.value;
+    if (inputValue === "" || /^[a-zA-Z][a-zA-Z\s]*$/.test(inputValue)) {
+      if (type === "fundCode") {
+        setNewBuyEntry({ ...newBuyEntry, Fund_Code: inputValue });
+      }
+    }
+    // Set isRefreshed to true to indicate unsaved changes
+    setIsRefreshed(true);
+  };
+
+  async function getRebalancingCompanyName() {
+    try {
+      const result = await RestfullApiService({}, 'user/GetMFBuyEntryCompanyMaster');
+      setReblancingCoName(result?.Result?.Table1);
+      setCoName(result?.Result?.Table1)
+    } catch (error) {
+
+    }
+  }
+  function handleBackButton() {
+    let errors = err;
+    setNewBuyEntry(BuyEntryData);
+    setError(errors);
+    setIsEdit(false);
+  }
+
+  const handleNumberInput = (event, type) => {
+    const inputValue = event.target.value;
+    if (inputValue === "" || /^\d+$/.test(inputValue)) {
+      if (type === "units") {
+        setNewBuyEntry({ ...newBuyEntry, Units: inputValue });
+        setError({ ...error, Units: "" });
+
+      }
+      else if (type === "purchase_cost") {
+        setNewBuyEntry({ ...newBuyEntry, Purchase_Cost: inputValue });
+        setError({ ...error, Purchase_Cost: "" });
+      }
+      else if (type === "FolioNumber") {
+        setNewBuyEntry({ ...newBuyEntry, DPID_Folio_Number: inputValue });
+        setError({ ...error, DPID_Folio_Number: "" });
+      }
+      else if (type === "noOfUnits") {
+        setNewBuyEntry({ ...newBuyEntry, Number_Of_Units: inputValue });
+        setError({ ...error, Number_Of_Units: "" });
+      }
+      else if (type === "searchInput") {
+        setSearchInput(inputValue)
+      }
+
+    }
+    // Set isRefreshed to true to indicate unsaved changes
+    setIsRefreshed(true);
+  };
+
+  const handleDeleteUser = async (user) => {
+    let notify;
+    try {
+      let data = {
+        ID: user?.ID
+      };
+      // API call
+      const result = await RestfullApiService(data, "user/DeleteMFBuyEntry");
+      if (result?.Status === 200) {
+        notify = () => toast.success(result?.Description);
+      }
+      handleSearchUser();
+      notify();
+    } catch (error) { }
+  };
+
+  async function handleEditUser(data1) {
+    try {
+      const data = {
+        ID: data1?.ID
+      }
+      const result = await RestfullApiService(data, 'user/GetSingleMFBuyEntryByID');
+      const user = result?.Result?.Table1[0];
+      console.log(result?.Result?.Table1[0]);
+      setNewBuyEntry({
+        ID: user?.ID,
+        Type: user?.Type,
+        Purchase_Type: user?.['PurchaseType'],
+        Rebalancing_Co_Name: (user?.['ReCoID']),
+        Co_Name: user?.['CompanyName'],
+        CoID: user?.CoID,
+        Type_Of_Investment: user?.['TypeOfInvestment'],
+        Investment_Date: user?.['InvestmentDate'].slice(0, 10),
+        ISIN: user?.['ISIN'],
+        ISINId: user?.ISINId,
+        Units: user?.['Units'],
+        Purchase_Cost: user?.['PurchaseCost'],
+        DPID_Folio_Number: user?.['DpidFolioNo'],
+        Status_Of_Pledge: user?.['StatusOfPledge'],
+        Number_Of_Units: user?.['NoOfUnits'],
+        Pledge_With: user?.['PledgeWith'],
+        Type_Of_Lien_Availed: user?.['TypeOfLienAvailed'],
+        Fund_Code: user?.['FundCode'],
+        Scheme_Name: user?.['SchemeName'],
+        Remark: user?.['Remarks'],
+      })
+      getSchemeName()
+    } catch (error) {
+
+    }
+
+  }
+
+  async function getPledgeWith() {
+    try {
+      const result = await RestfullApiService({}, 'user/GetMFBuyEntryPledgeWithMaster');
+      setPledgeWith(result?.Result?.Table1)
+    } catch (error) {
+
+    }
+  }
+  async function getSchemeName() {
+    try {
+      let url;
+      let data;
+      if (newBuyEntry?.Purchase_Type === 'Reinvestment') {
+        data = {
+          CoID: newBuyEntry?.CoID,
+          TypeOfInvestment: newBuyEntry?.Type_Of_Investment
+        }
+        url = 'user/GetMFBuyEntrySchemeNameForReinvestment'
+      } else {
+        data = {
+          Nature: newBuyEntry?.Type
+        }
+        url = 'user/GetMFBuyEntrySchemeName';
+      }
+      const result = await RestfullApiService(data, url);
+
+      setSchemeName(result?.Result?.Table1)
+    } catch (error) {
+
+    }
+  }
   useEffect(() => {
     const inputFields = document.querySelectorAll("input, textarea");
     const initialValues = {};
@@ -173,249 +554,17 @@ const BuyEntry = ({ props }) => {
     };
   }, [isRefreshed]);
 
-  // save user data
-  async function handleSaveUser() {
-    let notify = null;
-    if (isEdit) {
-      notify = () => toast.success("User updated successfully.");
-    } else {
-      notify = () => toast.success("User created successfully.");
-    }
-    try {
-      let errors = err;
-      // Function to trim string values
-      const trimValue = (value) => {
-        return typeof value === "string" ? value.trim() : value;
-      };
-
-      // Trim string values in newUser object
-      const trimmedUser = Object.fromEntries(
-        Object.entries(newBuyEntry).map(([key, value]) => [
-          key,
-          trimValue(value),
-        ])
-      );
-      // Update newUser object with trimmed values
-      setNewBuyEntry(trimmedUser);
-      // Perform validation
-      if (newBuyEntry?.Type === "") {
-        errors = { ...errors, Type: "Type is required." };
-      }
-      if (newBuyEntry?.Purchase_Type === "") {
-        errors = { ...errors, Purchase_Type: "Purchase type is required." };
-      }
-      if (newBuyEntry?.Rebalancing_Co_Name === "") {
-        errors = {
-          ...errors,
-          Rebalancing_Co_Name: "Rebalancing co. name is required.",
-        };
-      }
-      if (newBuyEntry?.Co_Name === "") {
-        errors = { ...errors, Co_Name: "Co. name is required." };
-      }
-      if (newBuyEntry?.Type_Of_Investment === "") {
-        errors = {
-          ...errors,
-          Type_Of_Investment: "Type Of investment is required.",
-        };
-      }
-      if (newBuyEntry?.ISIN === "") {
-        errors = { ...errors, ISIN: "ISIN is required." };
-      }
-      if (newBuyEntry?.Units === "") {
-        errors = { ...errors, Units: "Units is required." };
-      }
-      if (newBuyEntry?.Scheme_Name === "") {
-        errors = { ...errors, Scheme_Name: "Scheme name is required." };
-      }
-
-      setError(errors);
-
-      // Check if there are no validation errors
-      let flag = false;
-      for (const key in errors) {
-        if (errors[key] !== "") {
-          flag = true;
-          break;
-        }
-      }
-
-      // If no validation errors, proceed to save
-      if (!flag) {
-        const result = await RestfullApiService(
-          trimmedUser,
-          "master/SaveUserMaster"
-        );
-
-        if (result.Status === 200) {
-          notify();
-        }
-
-        // Reset newUser object
-        setAddUser(!addUser);
-        // After saving, reset the isRefreshed state to indicate that there are no unsaved changes
-        setIsRefreshed(false);
-        if (isEdit) {
-          setIsEdit(false);
-          handleSearchUser();
-        } else {
-          searchInput && handleSearchUser();
-        }
-        handleSearchUser();
-        setNewBuyEntry(BuyEntryData);
-      } else {
-        notify = () => toast.error("Mandatory fields should not be empty.");
-        notify();
-      }
-    } catch (error) {
-      // Handle error
-    }
-  }
-
-  const handleTextField = (e, type) => {
-    const inputValue = e.target.value;
-    if (inputValue === "" || /^[a-zA-Z][a-zA-Z\s]*$/.test(inputValue)) {
-      if (type === "userName") {
-        setNewBuyEntry({ ...newBuyEntry, User_Display_Name: inputValue });
-        setError({ ...error, User_Display_Name: "" });
-      } else if (type === "loginId") {
-        setNewBuyEntry({ ...newBuyEntry, User_Name: e.target.value });
-        setError({ ...error, User_Name: "" });
-      } else if (type === "designation") {
-        setNewBuyEntry({ ...newBuyEntry, Designation: e.target.value });
-        setError({ ...error, Designation: "" });
-      }
-    }
-    // Set isRefreshed to true to indicate unsaved changes
-    setIsRefreshed(true);
-  };
-
-  async function getDropDown(methodName, option1, option2) {
-    try {
-      let data = {
-        // Org_Id: userData?.OrgId,
-        // Method_Name: methodName,
-        // Login_User_Id: userData?.UserId,
-        // Option1: option1,
-        // Option2: option2,
-      };
-      // API call
-      const result = await RestfullApiService(data, "master/GetCommonDropdown");
-
-      if (methodName === "Entry_Type") {
-        setEntryType(result.Result);
-      }
-      if (methodName === "Purchase_Type") {
-        setPurchaseType(result.Result);
-      }
-      if (methodName === "Rebalancing_Co_Name") {
-        setReblancingCoName(result.Result);
-      }
-      if (methodName === "Co_Name") {
-        setCoName(result.Result);
-      }
-      if (methodName === "Type_of_Investment") {
-        setTypeOfInvestment(result.Result);
-      }
-      if (methodName === "Status_Of_Pledge") {
-        setStatusOfPledge(result.Result);
-      }
-      if (methodName === "Pledge_With") {
-        setPledgeWith(result.Result);
-      }
-      if (methodName === "Type_Of_Lien_Availed") {
-        setTypeOfLienAvailed(result.Result);
-      }
-    } catch (error) {}
-  }
-  function handleBackButton() {
-    let errors = err;
-    setNewBuyEntry(BuyEntryData);
-    setError(errors);
-    setIsEdit(false);
-  }
-
-  const handleNumberInput = (event, type) => {
-    const inputValue = event.target.value;
-    if (inputValue === "" || /^\d+$/.test(inputValue)) {
-      if (type === "mobile") {
-        setNewBuyEntry({ ...newBuyEntry, Mobile: inputValue });
-        setError({ ...error, Mobile: "" });
-      } else {
-        setNewBuyEntry({ ...newBuyEntry, Landline: inputValue });
-        setError({ ...error, Landline: "" });
-      }
-    }
-    // Set isRefreshed to true to indicate unsaved changes
-    setIsRefreshed(true);
-  };
-
-  const handleDeleteUser = async (user) => {
-    const notify = () => toast.success("User deleted successfully.");
-    try {
-      let data = {
-        //   Org_Id: userData?.OrgId,
-        //   Method_Name: "Delete",
-        //   Login_User_Id: userData?.UserId,
-        //   User_Id: user.User_Id,
-        //   User_Name: "",
-        //   UserType_Id: 0,
-        //   User_Password: "",
-        //   Employee_Id: "",
-        //   User_Display_Name: "",
-        //   Role_Id: "",
-        //   Is_Employee: -1,
-        //   Designation: "",
-        //   Mobile: "",
-        //   Landline: "",
-        //   Email: "",
-        //   Is_Active: 1,
-      };
-      // API call
-      const result = await RestfullApiService(data, "master/SaveUserMaster");
-      if (result.Status === 200) {
-        notify();
-      }
-      handleSearchUser();
-    } catch (error) {}
-  };
-
-  function handleEditUser(user) {
-    // setNewUser({
-    //   Org_Id: user.Org_Id,
-    //   Method_Name: "Update",
-    //   Login_User_Id: user.Login_User_Id,
-    //   UserType_Id: user.UserType_Id,
-    //   User_Name: user.Is_Employee === 1 ? "" : user.Login_User_Id,
-    //   User_Id: parseInt(user.User_Id),
-    //   User_Password: user.Is_Employee === 1 ? "" : user.User_Password,
-    //   Employee_Id: user.Employee_Id,
-    //   User_Display_Name: user.Is_Employee === 1 ? "" : user.User_Name,
-    //   Role_Id: user.Role_Id,
-    //   Is_Employee: user.Is_Employee,
-    //   Designation: user.Designation,
-    //   Mobile: user.Mobile,
-    //   Landline: user.Landline,
-    //   Email: user.Is_Employee === 1 ? "" : user.Email,
-    //   Is_Active: user.Is_Active,
-    // });
-    setNewBuyEntry({});
-  }
-
-  useEffect(() => {
-    getDropDown("Entry_Type", "", "");
-    getDropDown("Purchase_Type", "", "");
-    getDropDown("Rebalancing_Co_Name", "", "");
-    getDropDown("Co_Name", "", "");
-    getDropDown("Type_of_Investment", "", "");
-    getDropDown("Status_Of_Pledge", "", "");
-    getDropDown("Pledge_With", "", "");
-    getDropDown("Type_Of_Lien_Availed", "", "");
-  }, []);
-
   useEffect(() => {
     handleSearchUser();
+    getRebalancingCompanyName()
+    getPledgeWith()
   }, []);
+
+  useEffect(() => {
+    if (newBuyEntry?.Type && newBuyEntry?.Co_Name && newBuyEntry?.Purchase_Type && newBuyEntry?.Type_Of_Investment) {
+      getSchemeName()
+    }
+  }, [newBuyEntry])
   return (
     <>
       <div className="panel">
@@ -483,15 +632,15 @@ const BuyEntry = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={entryType}
-                      defaultValue={entryType?.find(
-                        (option) => option.value === newBuyEntry.Type
+                      value={newBuyEntry?.Type === '' ? '' : entryType?.find(
+                        (option) => option.label === newBuyEntry.Type
                       )}
                       isClearable
                       onChange={(selectedOption) => {
                         if (selectedOption) {
                           setNewBuyEntry({
                             ...newBuyEntry,
-                            Type: selectedOption.value,
+                            Type: selectedOption.label,
                           });
                         } else {
                           // Handle the case when the field is cleared
@@ -528,21 +677,22 @@ const BuyEntry = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={purchaseType}
-                      defaultValue={purchaseType?.find(
-                        (option) => option.value === newBuyEntry.Purchase_Type
+                      value={purchaseType?.find(
+                        (option) => option.label === newBuyEntry.Purchase_Type
                       )}
                       isClearable
                       onChange={(selectedOption) => {
                         if (selectedOption) {
                           setNewBuyEntry({
                             ...newBuyEntry,
-                            Purchase_Type: selectedOption.value,
+                            Purchase_Type: selectedOption?.label,
                           });
+
                         } else {
                           // Handle the case when the field is cleared
                           setNewBuyEntry({ ...newBuyEntry, Purchase_Type: "" });
                         }
-                        setError({ ...error, Purchase_Type: "" });
+                        setError({ ...error, Purchase_Type: "", Rebalancing_Co_Name: '' });
                         // Set isRefreshed to true to indicate unsaved changes
                         setIsRefreshed(true);
                       }}
@@ -569,20 +719,21 @@ const BuyEntry = ({ props }) => {
                       htmlFor="ddlAddSecurityCategory"
                     >
                       Rebalancing Co. Name
-                      <span className="text-danger">*</span>
+                      <span className="text-danger">{newBuyEntry?.Purchase_Type !== 'Rebalancing' ? '' : '*'}</span>
                     </label>
                     <ReactSelect
+                      isDisabled={(newBuyEntry?.Purchase_Type) && newBuyEntry?.Purchase_Type !== 'Rebalancing'}
                       options={reblancingCoName}
-                      defaultValue={reblancingCoName?.find(
+                      value={reblancingCoName?.find(
                         (option) =>
-                          option.value === newBuyEntry.Rebalancing_Co_Name
+                          option.value === newBuyEntry?.Rebalancing_Co_Name
                       )}
                       isClearable
                       onChange={(selectedOption) => {
                         if (selectedOption) {
                           setNewBuyEntry({
                             ...newBuyEntry,
-                            UserType_Id: selectedOption.value,
+                            Rebalancing_Co_Name: selectedOption.value,
                           });
                         } else {
                           // Handle the case when the field is cleared
@@ -608,9 +759,9 @@ const BuyEntry = ({ props }) => {
                         return inputValue;
                       }}
                     />
-                    {error.Rebalancing_Co_Name !== "" && (
+                    {error?.Rebalancing_Co_Name !== "" && (
                       <p className="error-validation">
-                        {error.Rebalancing_Co_Name}
+                        {error?.Rebalancing_Co_Name}
                       </p>
                     )}
                   </div>
@@ -624,19 +775,20 @@ const BuyEntry = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={coName}
-                      defaultValue={coName?.find(
-                        (option) => option.value === newBuyEntry.Co_Name
+                      value={coName?.find(
+                        (option) => option.label === newBuyEntry.Co_Name
                       )}
                       isClearable
                       onChange={(selectedOption) => {
                         if (selectedOption) {
                           setNewBuyEntry({
                             ...newBuyEntry,
-                            Co_Name: selectedOption.value,
+                            Co_Name: selectedOption.label,
+                            CoID: selectedOption.value
                           });
                         } else {
                           // Handle the case when the field is cleared
-                          setNewBuyEntry({ ...newBuyEntry, Co_Name: "" });
+                          setNewBuyEntry({ ...newBuyEntry, Co_Name: "", CoID: '' });
                         }
                         setError({ ...error, Co_Name: "" });
                         // Set isRefreshed to true to indicate unsaved changes
@@ -671,17 +823,18 @@ const BuyEntry = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={typeOfInvestment}
-                      defaultValue={typeOfInvestment?.find(
+                      value={typeOfInvestment?.find(
                         (option) =>
-                          option.value === newBuyEntry.Type_Of_Investment
+                          option.label === newBuyEntry?.Type_Of_Investment
                       )}
                       isClearable
                       onChange={(selectedOption) => {
                         if (selectedOption) {
                           setNewBuyEntry({
                             ...newBuyEntry,
-                            Type_Of_Investment: selectedOption.value,
+                            Type_Of_Investment: selectedOption.label,
                           });
+
                         } else {
                           // Handle the case when the field is cleared
                           setNewBuyEntry({
@@ -712,35 +865,51 @@ const BuyEntry = ({ props }) => {
                       </p>
                     )}
                   </div>
-                  <div className="col-lg-3 col-md-3  form-group mb-0">
+                  <div className="col-lg-6 col-md-6  form-group mb-0">
                     <label
-                      className="form-label fs-md"
-                      htmlFor="txtAddInterestDays"
+                      className="form-label global-label-tag"
+                      htmlFor="ddlAddSecurityCategory"
                     >
-                      Investment Date
+                      Scheme Name
+                      <span className="text-danger">*</span>
                     </label>
+                    <ReactSelect
+                      options={schemeName}
+                      value={schemeName?.find(
+                        (option) =>
+                          option.label === newBuyEntry?.Scheme_Name
+                      )}
+                      isClearable
+                      onChange={(selectedOption) => {
+                        if (selectedOption) {
+                          onChangeSchemeName(selectedOption?.value)
 
-                    <div>
-                      <input
-                        type="date"
-                        className="input-date"
-                        style={{
-                          width: "100%",
-                          height: "2.8em",
-                          border: "0.1px solid rgb(216, 215, 215)",
-                          outline: "none",
-                          borderRadius: "3px",
-                          padding: "0px 8px",
-                        }}
-                        onChange={(e) => handleDateChange(e.target.value)}
-                        defaultValue={newBuyEntry?.Investment_Date}
-                      />
-                    </div>
-
-                    {error.Registration_Date && (
-                      <div className="error-validation">
-                        {error.Registration_Date}
-                      </div>
+                        } else {
+                          // Handle the case when the field is cleared
+                          setNewBuyEntry({
+                            ...newBuyEntry,
+                            Scheme_Name: "",
+                          });
+                        }
+                        setError({ ...error, Scheme_Name: "" });
+                        // Set isRefreshed to true to indicate unsaved changes
+                        setIsRefreshed(true);
+                      }}
+                      styles={customStyles}
+                      {...props}
+                      onInputChange={(inputValue) => {
+                        if (/[^a-zA-Z\s]/.test(inputValue)) {
+                          const sanitizedInput = inputValue.replace(
+                            /[^a-zA-Z\s]/g,
+                            ""
+                          );
+                          return sanitizedInput;
+                        }
+                        return inputValue;
+                      }}
+                    />
+                    {error.Scheme_Name !== "" && (
+                      <p className="error-validation">{error.Scheme_Name}</p>
                     )}
                   </div>
                   <div className="col-lg-3 col-md-3  form-group mb-0">
@@ -763,13 +932,48 @@ const BuyEntry = ({ props }) => {
                           ...newBuyEntry,
                           ISIN: e.target.value,
                         });
+                        setError({ ...error, ISIN: '' })
                         // Set isRefreshed to true to indicate unsaved changes
                         setIsRefreshed(true);
                       }}
                       maxLength="50"
                     />
-                    {error.Employee_Name !== "" && (
-                      <p className="error-validation">{error.Employee_Name}</p>
+                    {error.ISIN !== "" && (
+                      <p className="error-validation">{error.ISIN}</p>
+                    )}
+                  </div>
+
+                </div>
+                <div className="row mt-2 mb-0 px-3" style={{ height: "80px" }}>
+                  <div className="col-lg-3 col-md-3  form-group mb-0">
+                    <label
+                      className="form-label fs-md"
+                      htmlFor="txtAddInterestDays"
+                    >
+                      Investment Date
+                    </label>
+
+                    <div>
+                      <input
+                        type="date"
+                        className="input-date"
+                        style={{
+                          width: "100%",
+                          height: "2.8em",
+                          border: "0.1px solid rgb(216, 215, 215)",
+                          outline: "none",
+                          borderRadius: "3px",
+                          padding: "0px 8px",
+                        }}
+                        onChange={(e) => { setNewBuyEntry({ ...newBuyEntry, Investment_Date: e.target.value }) }}
+                        value={newBuyEntry?.Investment_Date}
+                      />
+                    </div>
+
+                    {error.Registration_Date && (
+                      <div className="error-validation">
+                        {error.Registration_Date}
+                      </div>
                     )}
                   </div>
                   <div className="col-lg-3 col-md-3  form-group mb-0">
@@ -788,20 +992,20 @@ const BuyEntry = ({ props }) => {
                       autoComplete="off"
                       value={newBuyEntry?.Units}
                       onChange={(e) => {
-                        handleTextField(e, "userName");
+                        handleNumberInput(e, "units");
                         // Set isRefreshed to true to indicate unsaved changes
                         setIsRefreshed(true);
+
                       }}
+                      onBlur={() => getNav(newBuyEntry?.ISIN, newBuyEntry?.Investment_Date)}
                       maxLength="50"
                     />
-                    {error.Reporting_Manager !== "" && (
+                    {error?.Units !== "" && (
                       <p className="error-validation">
-                        {error.Reporting_Manager}
+                        {error?.Units}
                       </p>
                     )}
                   </div>
-                </div>
-                <div className="row mt-2 mb-0 px-3" style={{ height: "80px" }}>
                   <div className="col-lg-3 col-md-3  form-group mb-0">
                     <label
                       className="form-label global-label-tag"
@@ -815,17 +1019,15 @@ const BuyEntry = ({ props }) => {
                       id="txtAddSecurityName"
                       placeholder="Purchase Cost"
                       autoComplete="off"
-                      value={newBuyEntry?.Purchase_Cost}
+                      value={newBuyEntry?.Units === '' ? "" : newBuyEntry?.Purchase_Cost}
                       onChange={(e) => {
-                        handleTextField(e, "userName");
+                        handleNumberInput(e, "purchase_cost");
                         // Set isRefreshed to true to indicate unsaved changes
                         setIsRefreshed(true);
                       }}
                       maxLength="50"
                     />
-                    {error.Employee_Name !== "" && (
-                      <p className="error-validation">{error.Employee_Name}</p>
-                    )}
+
                   </div>
                   <div className="col-lg-3 col-md-3  form-group mb-0">
                     <label
@@ -842,7 +1044,7 @@ const BuyEntry = ({ props }) => {
                       autoComplete="off"
                       value={newBuyEntry?.DPID_Folio_Number}
                       onChange={(e) => {
-                        handleTextField(e, "userName");
+                        handleNumberInput(e, "FolioNumber");
                         // Set isRefreshed to true to indicate unsaved changes
                         setIsRefreshed(true);
                       }}
@@ -854,6 +1056,9 @@ const BuyEntry = ({ props }) => {
                       </p>
                     )}
                   </div>
+
+                </div>
+                <div className="row mt-2 mb-0 px-3" style={{ height: "80px" }}>
                   <div className="col-lg-3 col-md-3  form-group mb-0">
                     <label
                       className="form-label global-label-tag"
@@ -863,9 +1068,10 @@ const BuyEntry = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={statusOfPledge}
-                      defaultValue={statusOfPledge?.find(
+                      isDisabled={newBuyEntry?.Type_Of_Investment === 'Sponser Commitment'}
+                      value={statusOfPledge?.find(
                         (option) =>
-                          option.value === newBuyEntry?.Status_Of_Pledge
+                          option.value === newBuyEntry?.Status_Of_Pledge?.toString()
                       )}
                       isClearable
                       onChange={(selectedOption) => {
@@ -917,9 +1123,10 @@ const BuyEntry = ({ props }) => {
                       id="txtAddSecurityName"
                       placeholder="Number Of Units"
                       autoComplete="off"
-                      value={newBuyEntry.Number_Of_Units}
+                      value={newBuyEntry?.Number_Of_Units}
+                      disabled={newBuyEntry?.Type_Of_Investment === 'Sponser Commitment'}
                       onChange={(e) => {
-                        handleTextField(e, "userName");
+                        handleNumberInput(e, "noOfUnits");
                         // Set isRefreshed to true to indicate unsaved changes
                         setIsRefreshed(true);
                       }}
@@ -931,8 +1138,6 @@ const BuyEntry = ({ props }) => {
                       </p>
                     )}
                   </div>
-                </div>
-                <div className="row mt-2 mb-0 px-3" style={{ height: "80px" }}>
                   <div className="col-lg-3 col-md-3  form-group mb-0">
                     <label
                       className="form-label global-label-tag"
@@ -943,10 +1148,11 @@ const BuyEntry = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={pledgeWith}
-                      defaultValue={pledgeWith?.find(
+                      value={pledgeWith?.find(
                         (option) => option.value === newBuyEntry?.Pledge_With
                       )}
                       isClearable
+                      isDisabled={newBuyEntry?.Type_Of_Investment === 'Sponser Commitment'}
                       onChange={(selectedOption) => {
                         if (selectedOption) {
                           setNewBuyEntry({
@@ -988,11 +1194,12 @@ const BuyEntry = ({ props }) => {
                     </label>
                     <ReactSelect
                       options={typeOfLienAvailed}
-                      defaultValue={typeOfLienAvailed?.find(
+                      value={typeOfLienAvailed?.find(
                         (option) =>
-                          option.value === newBuyEntry?.Type_Of_Lien_Availed
+                          option.value === newBuyEntry?.Type_Of_Lien_Availed?.toString()
                       )}
                       isClearable
+                      isDisabled={newBuyEntry?.Type_Of_Investment === 'Sponser Commitment'}
                       onChange={(selectedOption) => {
                         if (selectedOption) {
                           setNewBuyEntry({
@@ -1029,6 +1236,9 @@ const BuyEntry = ({ props }) => {
                       </p>
                     )}
                   </div>
+
+                </div>
+                <div className="row mt-2 mb-0 px-3" style={{ height: "80px" }}>
                   <div className="col-lg-3 col-md-3  form-group mb-0">
                     <label
                       className="form-label global-label-tag"
@@ -1044,7 +1254,7 @@ const BuyEntry = ({ props }) => {
                       autoComplete="off"
                       value={newBuyEntry?.Fund_Code}
                       onChange={(e) => {
-                        handleTextField(e, "userName");
+                        handleTextField(e, "fundCode");
                         // Set isRefreshed to true to indicate unsaved changes
                         setIsRefreshed(true);
                       }}
@@ -1052,33 +1262,6 @@ const BuyEntry = ({ props }) => {
                     />
                     {error.Fund_Code !== "" && (
                       <p className="error-validation">{error.Fund_Code}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="row mt-2 mb-0 px-3" style={{ height: "80px" }}>
-                  <div className="col-lg-6 col-md-6  form-group mb-0">
-                    <label
-                      className="form-label global-label-tag"
-                      htmlFor="ddlAddSecurityCategory"
-                    >
-                      Scheme Name
-                      <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="txtAddSecurityName"
-                      placeholder="Scheme Name"
-                      autoComplete="off"
-                      value={newBuyEntry?.Scheme_Name}
-                      onChange={(e) => {
-                        handleTextField(e, "userName");
-                        // Set isRefreshed to true to indicate unsaved changes
-                        setIsRefreshed(true);
-                      }}
-                    />
-                    {error.Scheme_Name !== "" && (
-                      <p className="error-validation">{error.Scheme_Name}</p>
                     )}
                   </div>
                   <div className="col-lg-6 col-md-6  form-group mb-0">
@@ -1096,14 +1279,12 @@ const BuyEntry = ({ props }) => {
                       autoComplete="off"
                       value={newBuyEntry?.Remark}
                       onChange={(e) => {
-                        handleTextField(e, "userName");
+                        setNewBuyEntry({ ...newBuyEntry, Remark: e.target.value })
                         // Set isRefreshed to true to indicate unsaved changes
                         setIsRefreshed(true);
                       }}
                     />
-                    {error.Remark !== "" && (
-                      <p className="error-validation">{error.Remark}</p>
-                    )}
+
                   </div>
                 </div>
               </>
@@ -1127,8 +1308,8 @@ const BuyEntry = ({ props }) => {
                               id="txtSearchSecurity"
                               placeholder="Buy Entry ID"
                               autoComplete="off"
-                              defaultValue={searchInput}
-                              onChange={(e) => setSearchInput(e.target.value)}
+                              value={searchInput}
+                              onChange={(e) => handleNumberInput(e, 'searchInput')}
                             />
                             {error.Buy_Entry_ID !== "" ? (
                               <p
@@ -1165,6 +1346,7 @@ const BuyEntry = ({ props }) => {
                             setAddUser={setAddUser}
                             setIsEdit={setIsEdit}
                             handleDeleteUser={handleDeleteUser}
+                            searchInput={searchInput}
                           />
                         </div>
                       </div>

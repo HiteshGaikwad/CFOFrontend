@@ -7,13 +7,15 @@ import {
 } from "react-table";
 import { FaFileWord } from "react-icons/fa";
 import { RestfullApiService } from "../../../../../config/Api's";
+import { toast } from "react-toastify";
+import wordLogo from "../../../../../assets/images/word.png"
+import { BASE_URL } from "../../../../../config/url";
 
 const FDRenewLiquidationGrid = ({
   userInfo,
-  handleEditUser,
-  handleDeleteUser,
+  handleSearchUser
 }) => {
-    const [checkedData, setCheckedData]= useState([]);
+  const [checkedData, setCheckedData] = useState([]);
   const columns = useMemo(
     () => [
       {
@@ -41,18 +43,8 @@ const FDRenewLiquidationGrid = ({
         width: 150,
         minWidth: 150,
       },
-      {
-        Header: "From Date",
-        accessor: "FromDate",
-        width: 150,
-        minWidth: 150,
-      },
-      {
-        Header: "Maturity Date",
-        accessor: "MaturityDate",
-        width: 150,
-        minWidth: 150,
-      },
+      { Header: "From Date", accessor: "FromDate", Cell: ({ value }) => value ? value.slice(0, 10) : '', width: 150, minWidth: 150, },
+      { Header: "Maturity Date", accessor: "MaturityDate", Cell: ({ value }) => value ? value.slice(0, 10) : '', width: 150, minWidth: 150, },
       {
         Header: "Status",
         accessor: "Status",
@@ -61,25 +53,25 @@ const FDRenewLiquidationGrid = ({
       },
       {
         Header: "Action",
-        Cell: ({row})=>(
-            <div >
-                <input type="checkbox" className="checkbox-color" 
-                onChange={() => handleCheckBox(row?.id)}
-                checked={checkedData[row?.id]}
-              />
-            </div>
+        Cell: ({ row }) => (
+          <div >
+            <input type="checkbox" className="checkbox-color"
+              onChange={() => handleCheckBox(row?.id)}
+              checked={checkedData[row?.id]}
+            />
+          </div>
         ),
         disableSortBy: true,
         width: 100,
         minWidth: 100,
       },
-      
+
       {
-        Header: "Donwload",
+        Header: "Download",
         disableSortBy: true,
         Cell: ({ row }) => (
-            <div className=" action-button">
-                <button
+          <div className=" action-button">
+            <button
               title="Word File"
               style={{
                 border: "none",
@@ -90,14 +82,20 @@ const FDRenewLiquidationGrid = ({
                 margin: "0px 13px",
               }}
               onClick={() => {
-                downloadWordFile(row)
+                downloadWordFile(row?.original?.FDInt_ID)
               }}
             >
-              <FaFileWord style={{ color: "#EB6400", fontSize: "22px" }}/>
+              <img
+                src={wordLogo}
+                alt="excel file logo"
+                title="Excel file "
+                style={{ width: "30px" }}
+              />
+              {/* <FaFileWord style={{ color: "#EB6400", fontSize: "22px" }} /> */}
             </button>
-             
-            </div>
-          ),
+
+          </div>
+        ),
         width: 150,
         minWidth: 150,
       },
@@ -107,55 +105,67 @@ const FDRenewLiquidationGrid = ({
 
   function handleCheckBox(id) {
     if (checkedData[id] === true) {
-      checkedData[id]=false; // Uncheck if the same checkbox is clicked
+      checkedData[id] = false; // Uncheck if the same checkbox is clicked
     } else {
-      checkedData[id]=true;
+      checkedData[id] = true;
     }
     setCheckedData(checkedData) // Check the new checkbox
   }
-async function handleRenewFD(){
-  try {
-    console.log(checkedData);
-    for(let i=0; i<checkedData.length; i++){
-      if(checkedData[i]===true){
-        const data={
-          FDId: userInfo[i]?.FDInt_ID?.toString(),
-      Status: userInfo[i]?.Status
+  async function handleRenewFD() {
+    try {
+      for (let i = 0; i < checkedData.length; i++) {
+        if (checkedData[i] === true) {
+          const data = {
+            FDId: userInfo[i]?.FDInt_ID?.toString(),
+            Status: userInfo[i]?.Status
+          }
+          const result = await RestfullApiService(data, 'user/UpdateFDTransctionRenewLiquidation');
+          if (result?.Status === 200) {
+            handleSearchUser()
+            setCheckedData([]);
+            const notify = () => toast.success(result?.Description);
+            notify()
+          }
         }
-        const result= await RestfullApiService(data,'user/UpdateFDTransctionRenewLiquidation');
-        console.log(result);
       }
-    }
-  } catch (error) {
-    
-  }
-}
-async function downloadWordFile(row){
-  try {
-    const data={
-      FDID:row?.original?.FDInt_ID
-    }
-    const result= await RestfullApiService(data,'user/CreateWordDocument_FDLiquidation')
-    handleDownloadTeplate()
-  } catch (error) {
-    
-  }
-}
 
-const handleDownloadTeplate = () => {
-  const url = 'http://localhost:5000/api/user/CreateWordDocument_FDLiquidation';
-  // Create a temporary anchor element
-  const link = document.createElement('a');
-  link.href = url;
-  // Set the download attribute with a default file name
-  link.setAttribute('download', 'sample-company-details.docx');
-  // Append the link to the body
-  document.body.appendChild(link);
-  // Programmatically click the link to trigger the download
-  link.click();
-  // Remove the link from the document
-  document.body.removeChild(link);
-};
+    } catch (error) {
+
+    }
+  }
+  async function downloadWordFile(id) {
+    try {
+      const url = `${BASE_URL}user/CreateWordDocument_FDLiquidation?FDID=${id}`;
+      // Create a temporary anchor element
+      const link = document.createElement('a');
+      link.href = url;
+      // Set the download attribute with a default file name
+      link.setAttribute('download', 'CreateFD.docx');
+      // Append the link to the body
+      document.body.appendChild(link);
+      // Programmatically click the link to trigger the download
+      link.click();
+      // Remove the link from the document
+      document.body.removeChild(link);
+    } catch (error) {
+
+    }
+  }
+
+  const handleDownloadTeplate = () => {
+    const url = 'http://localhost:5000/api/user/CreateWordDocument_FDLiquidation';
+    // Create a temporary anchor element
+    const link = document.createElement('a');
+    link.href = url;
+    // Set the download attribute with a default file name
+    link.setAttribute('download', 'sample-company-details.docx');
+    // Append the link to the body
+    document.body.appendChild(link);
+    // Programmatically click the link to trigger the download
+    link.click();
+    // Remove the link from the document
+    document.body.removeChild(link);
+  };
   const data = useMemo(() => userInfo || [], [userInfo]);
 
   const {
@@ -190,16 +200,17 @@ const handleDownloadTeplate = () => {
           justifyContent: "end",
         }}
       >
-       <button
-                type="button"
-                title="Renew FD"
-                className="btn btn-sm btn-primary text-white mb-2"
-                onClick={() => { handleRenewFD()
-                }}
-                id="btn_Save"
-              >
-                Renew FD
-              </button>
+        <button
+          type="button"
+          title="Renew FD"
+          className="btn btn-sm btn-primary text-white mb-2"
+          onClick={() => {
+            handleRenewFD()
+          }}
+          id="btn_Save"
+        >
+          Renew FD
+        </button>
       </div>
       <style>
         {`
@@ -315,11 +326,10 @@ const handleDownloadTeplate = () => {
                       >
                         {column.isSorted ? (
                           <i
-                            className={`fa-solid ${
-                              column.isSortedDesc
-                                ? "fa-arrow-down"
-                                : "fa-arrow-up"
-                            }`}
+                            className={`fa-solid ${column.isSortedDesc
+                              ? "fa-arrow-down"
+                              : "fa-arrow-up"
+                              }`}
                             style={{ color: "gray" }}
                           ></i>
                         ) : (
@@ -412,7 +422,7 @@ const handleDownloadTeplate = () => {
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <div>
+          {/* <div>
             {Array.from(
               { length: Math.min(10, pageOptions.length) },
               (_, i) => {
@@ -423,9 +433,8 @@ const handleDownloadTeplate = () => {
                     onClick={() => {
                       gotoPage(i);
                     }}
-                    className={`btn btn-sm btn-default transition-3d-hover SearchButton ${
-                      pageIndex === i ? "active" : ""
-                    }`}
+                    className={`btn btn-sm btn-default transition-3d-hover SearchButton ${pageIndex === i ? "active" : ""
+                      }`}
                     style={{
                       height: "calc(1.47em + 1rem + 2px)",
                       marginLeft: "5px",
@@ -438,7 +447,7 @@ const handleDownloadTeplate = () => {
                 );
               }
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}

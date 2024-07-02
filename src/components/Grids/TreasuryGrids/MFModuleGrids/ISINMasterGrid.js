@@ -7,6 +7,7 @@ import {
 } from "react-table";
 import { FaRegEdit } from "react-icons/fa";
 import DeleteButton from "../../../../config/DeleteButton";
+import { BASE_URL } from "../../../../config/url";
 
 const ISINMasterGrid = ({
   userInfo,
@@ -14,6 +15,7 @@ const ISINMasterGrid = ({
   handleDeleteUser,
   setAddUser,
   setIsEdit,
+  searchInput
 }) => {
   const columns = useMemo(
     () => [
@@ -22,7 +24,7 @@ const ISINMasterGrid = ({
         accessor: (row, index) => index + 1,
         Cell: ({ value }) => <div className="text-left">{value}</div>,
 
-        minWidth:80,
+        minWidth: 80,
       },
       {
         Header: "ISIN",
@@ -119,20 +121,24 @@ const ISINMasterGrid = ({
   };
 
   // Function to download CSV file
-  const downloadCSV = () => {
-    const csvContent = convertToCSV();
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "ISINMaster-Data.csv");
-      link.style.visibility = "hidden";
+  const downloadCSV = async () => {
+    try {
+      const url = `${BASE_URL}user/DownloadMFISINMaster?ISIN=${searchInput}`;
+      // Create a temporary anchor element
+      const link = document.createElement('a');
+      link.href = url;
+      // Set the download attribute with a default file name
+      link.setAttribute('download', 'ISIN-Master.xlsx');
+      // Append the link to the body
       document.body.appendChild(link);
+      // Programmatically click the link to trigger the download
       link.click();
+      // Remove the link from the document
       document.body.removeChild(link);
+    } catch (error) {
+
     }
-  };
+  }
 
   return (
     <div className="city-table-container" style={{ position: "relative" }}>
@@ -141,7 +147,7 @@ const ISINMasterGrid = ({
           display: "flex",
           justifyContent: "end",
         }}
-        // className="custom-export-button"
+      // className="custom-export-button"
       >
         <button onClick={downloadCSV} className="custom-export-button">
           EXPORT
@@ -223,11 +229,11 @@ const ISINMasterGrid = ({
         
         `}
       </style>
-      <div>
+      <div style={{ overflowX: "scroll", marginBottom: '10px' }}>
         <table
           {...getTableProps()}
           id="tableMaturity"
-          className="table table-bordered table-hover table-striped w-100 overflow-x-scroll"
+          className="table table-bordered table-hover table-striped w-100 "
         >
           <thead className="bg-highlight">
             {headerGroups.map((headerGroup) => (
@@ -261,11 +267,10 @@ const ISINMasterGrid = ({
                       >
                         {column.isSorted ? (
                           <i
-                            className={`fa-solid ${
-                              column.isSortedDesc
-                                ? "fa-arrow-down"
-                                : "fa-arrow-up"
-                            }`}
+                            className={`fa-solid ${column.isSortedDesc
+                              ? "fa-arrow-down"
+                              : "fa-arrow-up"
+                              }`}
                             style={{ color: "gray" }}
                           ></i>
                         ) : (
@@ -324,6 +329,7 @@ const ISINMasterGrid = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: '10px'
         }}
       >
         <div>
@@ -358,9 +364,9 @@ const ISINMasterGrid = ({
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <div>
+          {/* <div>
             {Array.from(
-              { length: Math.min(10, pageOptions.length) },
+              { length: Math.min(5, pageOptions.length) },
               (_, i) => {
                 const pageIdx = i + 1;
                 return (
@@ -369,9 +375,8 @@ const ISINMasterGrid = ({
                     onClick={() => {
                       gotoPage(i);
                     }}
-                    className={`btn btn-sm btn-default transition-3d-hover SearchButton ${
-                      pageIndex === i ? "active" : ""
-                    }`}
+                    className={`btn btn-sm btn-default transition-3d-hover SearchButton ${pageIndex === i ? "active" : ""
+                      }`}
                     style={{
                       height: "calc(1.47em + 1rem + 2px)",
                       marginLeft: "5px",
@@ -379,12 +384,12 @@ const ISINMasterGrid = ({
                     }}
                     type="button"
                   >
-                    {pageIdx}
+                    {pageIdx <= Math.min(5, pageOptions.length) ? pageIdx : pageIdx + 1}
                   </button>
                 );
               }
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}

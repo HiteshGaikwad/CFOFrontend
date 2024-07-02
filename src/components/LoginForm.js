@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import backGround from "../assets/images/pattern-1.svg";
-import loginLogo from "../assets/images/user_assets/logo_full.jpg";
+import loginLogo from "../assets/images/user_assets/logo_full.png";
 import navLogo from "../assets/images/user_assets/logo.png";
 import { BASE_URL } from "../config/url";
 import { toast } from "react-toastify";

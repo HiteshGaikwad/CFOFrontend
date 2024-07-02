@@ -75,86 +75,87 @@ const sourceOfFund = [
 const fdReplicationCount = [
   {
     label: "1",
-    value: "1",
+    value: 1,
   },
   {
     label: "2",
-    value: "2",
+    value: 2,
   },
   {
     label: "3",
-    value: "3",
+    value: 3,
   },
   {
     label: "4",
-    value: "4",
+    value: 4,
   },
   {
     label: "5",
-    value: "5",
+    value: 5,
   },
   {
     label: "6",
-    value: "6",
+    value: 6,
   },
   {
     label: "7",
-    value: "7",
+    value: 7,
   },
   {
     label: "8",
-    value: "8",
+    value: 8,
   },
   {
     label: "9",
-    value: "9",
+    value: 9,
   },
   {
     label: "10",
-    value: "10",
+    value: 10,
   },
   {
     label: "11",
-    value: "11",
+    value: 11,
   },
   {
     label: "12",
-    value: "12",
+    value: 12,
   },
   {
     label: "13",
-    value: "13",
+    value: 13,
   },
   {
     label: "14",
-    value: "14",
+    value: 14,
   },
   {
     label: "15",
-    value: "15",
+    value: 15,
   },
   {
     label: "16",
-    value: "16",
+    value: 16,
   },
   {
     label: "17",
-    value: "17",
+    value: 17,
   },
   {
     label: "18",
-    value: "18",
+    value: 18,
   },
   {
     label: "19",
-    value: "19",
+    value: 19,
   },
   {
     label: "20",
-    value: "20",
+    value: 20,
   },
 ]
 const FdTransactionData = {
+  FDInt_Id: 0,
   Co_Name: "",
   FD_Favouring: "",
   Type_Of_FD: "",
@@ -175,7 +176,7 @@ const FdTransactionData = {
   Segment: "",
   Segment_Id: '',
   FD_Initiator_name_Team: "",
-  FD_Replication_Count: "",
+  FD_Replication_Count: '',
   File_Upload: "",
   Prematured_FD_Rate: "",
   Prematurity_Date: "",
@@ -343,12 +344,12 @@ const CreateFD = ({ props }) => {
       if (newFdTransactionEntry?.Segment === "") {
         errors = { ...errors, Segment: "Segment is required." };
       }
-      if (newFdTransactionEntry?.FD_Replication_Count === "") {
-        errors = {
-          ...errors,
-          FD_Replication_Count: "FD Replication Count is required.",
-        };
-      }
+      // if (newFdTransactionEntry?.FD_Replication_Count === "") {
+      //   errors = {
+      //     ...errors,
+      //     FD_Replication_Count: "FD Replication Count is required.",
+      //   };
+      // }
       if (newFdTransactionEntry?.Prematured_FD_Rate === "") {
         errors = {
           ...errors,
@@ -385,7 +386,7 @@ const CreateFD = ({ props }) => {
       // If no validation errors, proceed to save
       if (!flag) {
         const data = {
-          FDInt_ID: 0,
+          FDInt_ID: newFdTransactionEntry?.FDInt_Id,
           Co_Name: newFdTransactionEntry?.Co_Name?.toString(),
           TypeofFD: newFdTransactionEntry?.Type_Of_FD,
           ClientCode: "",
@@ -408,7 +409,7 @@ const CreateFD = ({ props }) => {
           Segement: newFdTransactionEntry?.Segment,
           Seg_ID: newFdTransactionEntry?.Segment_Id,
           TypeofLien: "",
-          FDScanCopy: 'D:\\Treasury\\Transactions\\FileUpload' + (newFdTransactionEntry?.File_Upload).slice(11),
+          FDScanCopy: 'D:\\Treasury\\Transactions\\FileUpload\\' + (newFdTransactionEntry?.File_Upload),
           Remarks: newFdTransactionEntry?.Remark,
           Status: newFdTransactionEntry?.Status,
           CreatedBy: userData?.EmpID,
@@ -417,7 +418,7 @@ const CreateFD = ({ props }) => {
           TenureInDays: newFdTransactionEntry?.Tenure,
           FDInitiatorTeam: newFdTransactionEntry?.FD_Initiator_name_Team,
           FDFavouring: newFdTransactionEntry?.FD_Favouring,
-          ReplicateFDCount: newFdTransactionEntry?.FD_Replication_Count,
+          ReplicateFDCount: (newFdTransactionEntry?.FD_Replication_Count) ? (newFdTransactionEntry?.FD_Replication_Count) : 0,
           Action: "Pending With Maker",
           SourceOfFund: newFdTransactionEntry?.Source_of_Fund
         }
@@ -539,32 +540,18 @@ const CreateFD = ({ props }) => {
   };
 
   const handleDeleteUser = async (user) => {
-    const notify = () => toast.success("User deleted successfully.");
+    let notify;
     try {
       let data = {
-        //   Org_Id: userData?.OrgId,
-        //   Method_Name: "Delete",
-        //   Login_User_Id: userData?.UserId,
-        //   User_Id: user.User_Id,
-        //   User_Name: "",
-        //   UserType_Id: 0,
-        //   User_Password: "",
-        //   Employee_Id: "",
-        //   User_Display_Name: "",
-        //   Role_Id: "",
-        //   Is_Employee: -1,
-        //   Designation: "",
-        //   Mobile: "",
-        //   Landline: "",
-        //   Email: "",
-        //   Is_Active: 1,
+        FDID: user?.FDID
       };
       // API call
-      const result = await RestfullApiService(data, "master/SaveUserMaster");
-      if (result.Status === 200) {
-        notify();
+      const result = await RestfullApiService(data, "user/DeleteFDTransctionCreateFD");
+      if (result?.Status === 200) {
+        notify = () => toast.success(result?.Description);
       }
       handleSearchUser();
+      notify();
     } catch (error) { }
   };
 
@@ -574,14 +561,13 @@ const CreateFD = ({ props }) => {
       const data = {
         FDID: user?.FDID
       }
-      // debugger
       const result = await RestfullApiService(data, 'user/GetSingleFDTransctionDataByID')
       const val = result?.Result?.Table1[0]
-      console.log(val);
       const filepath = val?.FDScanCopy?.split('\\');
       const filename = filepath[filepath.length - 1];
       setNewFdTransactionEntry({
         ...newFdTransactionEntry,
+        FDInt_Id: val?.FDInt_ID,
         Co_Name: val?.CoName,
         FD_Favouring: val?.FDFavouring,
         Type_Of_FD: val?.TypeofFD,
@@ -610,6 +596,7 @@ const CreateFD = ({ props }) => {
         Source_of_Fund: val?.SourceOfFund,
         Approved_Reject_Reason: val?.ApprovedRejectReason,
       });
+      console.log(newFdTransactionEntry);
     } catch (error) {
 
     }
@@ -691,7 +678,8 @@ const CreateFD = ({ props }) => {
     }
   }
   function handleFileUpload(e) {
-    setNewFdTransactionEntry({ ...newFdTransactionEntry, File_Upload: e.target.value })
+    const filename = e?.target?.files[0].name;
+    setNewFdTransactionEntry({ ...newFdTransactionEntry, File_Upload: filename })
   }
 
 
@@ -1845,6 +1833,7 @@ const CreateFD = ({ props }) => {
                             setAddUser={setAddUser}
                             setIsEdit={setIsEdit}
                             handleDeleteUser={handleDeleteUser}
+                            searchInput={searchInput}
                           />
                         </div>
                       </div>

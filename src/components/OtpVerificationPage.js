@@ -8,7 +8,7 @@ import { EncryptionCode } from "../config/EncryptionCode";
 import { RestfullApiService } from "../config/Api's";
 let notify;
 
-const OtpVerificationPage = ({ setIsLogedIn, checked, userDataAtLogedIn,empCode }) => {
+const OtpVerificationPage = ({ setIsLogedIn, checked, userDataAtLogedIn, empCode }) => {
   let numberOfDigits = 6;
   const navigate = useNavigate();
 
@@ -38,10 +38,10 @@ const OtpVerificationPage = ({ setIsLogedIn, checked, userDataAtLogedIn,empCode 
           otpBoxReference.current[index + 1].focus();
         }
       } else {
-        
+
       }
     } else {
-      
+
     }
   }
 
@@ -85,26 +85,26 @@ const OtpVerificationPage = ({ setIsLogedIn, checked, userDataAtLogedIn,empCode 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoginVisible(true)
-    
+
     try {
       const userData = {
-        EmpCode:empCode,
+        EmpCode: empCode,
         OTP: otp.join(""),
       };
-      const result = await RestfullApiService(userData,"user/VerifyOTP");
+      const result = await RestfullApiService(userData, "user/VerifyOTP");
       if (result?.Token !== null) {
         const userData = {
           ADUsername: result?.Result?.Table1[0]?.ADUsername,
           EmailAddress: result?.Result?.Table1[0]?.EmailAddress,
-          EmpCode:result?.Result?.Table1[0]?.EmpCode,
-          EmpID:result?.Result?.Table1[0]?.EmpID,
-          ImageURL:result?.Result?.Table1[0]?.ImageURL,
-          MobileNumber:result?.Result?.Table1[0]?.MobileNumber,
-          PROFILE_ID:result?.Result?.Table1[0]?.PROFILE_ID,
-          PROFILE_NM:result?.Result?.Table1[0]?.PROFILE_NM,
-          Role:result?.Result?.Table1[0]?.Role,
-          ShortName:result?.Result?.Table1[0]?.ShortName,
-          FullName:result?.Result?.Table1[0]?.FullName
+          EmpCode: result?.Result?.Table1[0]?.EmpCode,
+          EmpID: result?.Result?.Table1[0]?.EmpID,
+          ImageURL: result?.Result?.Table1[0]?.ImageURL,
+          MobileNumber: result?.Result?.Table1[0]?.MobileNumber,
+          PROFILE_ID: result?.Result?.Table1[0]?.PROFILE_ID,
+          PROFILE_NM: result?.Result?.Table1[0]?.PROFILE_NM,
+          Role: result?.Result?.Table1[0]?.Role,
+          ShortName: result?.Result?.Table1[0]?.ShortName,
+          FullName: result?.Result?.Table1[0]?.FullName
         };
 
         // storing menu list in session storage
@@ -132,7 +132,7 @@ const OtpVerificationPage = ({ setIsLogedIn, checked, userDataAtLogedIn,empCode 
         navigate(`${urlPath}Home`);
       } else {
       }
-      
+
     } catch (error) {
       setOtp(new Array(numberOfDigits).fill(""));
       notify = () => toast.error("OTP Invalid. Request a new one.");
@@ -184,7 +184,7 @@ const OtpVerificationPage = ({ setIsLogedIn, checked, userDataAtLogedIn,empCode 
       setShowTimer(true);
       notify();
     }
-     catch (error) {}
+    catch (error) { }
   };
 
   return (
@@ -277,7 +277,7 @@ const OtpVerificationPage = ({ setIsLogedIn, checked, userDataAtLogedIn,empCode 
                 letterSpacing: "-0.3",
                 fontSize: "14px",
               }}
-              onClick={() => {}}
+              onClick={() => { }}
             >
               Resend in{" "}
               <span style={{ fontWeight: "700" }}>{formattedTimer}</span>
@@ -305,28 +305,28 @@ const OtpVerificationPage = ({ setIsLogedIn, checked, userDataAtLogedIn,empCode 
           Verify
         </button> */}
         <button
-                            id="btnLogin"
-                            type="submit"
-                            className="btn btn-primary float-right text-white"
-                            disabled={isLoginVisible || !isOtpValid}
-                            onClick={handleSubmit}
-                          >
-                            <span
-                              id="loadersignin"
-                              className="spinner-border spinner-border-sm"
-                              role="status"
-                              aria-hidden="true"
-                              style={{ display: "none" }}
-                            ></span>
-                            {isLoginVisible ? (
-                              <i
-                                className="fa fa-spinner fa-spin"
-                                style={{ fontSize: "14px" }}
-                              ></i>
-                            ) : (
-                              <span id="labelsignin">Verify</span>
-                            )}
-                          </button>
+          id="btnLogin"
+          type="submit"
+          className="btn btn-primary float-right text-white"
+          disabled={isLoginVisible || !isOtpValid}
+          onClick={handleSubmit}
+        >
+          <span
+            id="loadersignin"
+            className="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+            style={{ display: "none" }}
+          ></span>
+          {isLoginVisible ? (
+            <i
+              className="fa fa-spinner fa-spin"
+              style={{ fontSize: "14px" }}
+            ></i>
+          ) : (
+            <span id="labelsignin">Verify</span>
+          )}
+        </button>
       </form>
       <div id="spacing" className="h-16"></div>
     </>

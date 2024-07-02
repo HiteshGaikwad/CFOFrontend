@@ -318,3 +318,19 @@ td {
 .back-btn:hover {
   background-color: #fa8634;
 }
+
+.fdReport {
+  padding-top: 0 !important;
+}
+
+.table-contain {
+  max-height: calc(100vh - 10px);
+  overflow-y: auto;
+  position: relative;
+}
+
+thead.sticky-on {
+  position: sticky;
+  top: 0;
+  /* color: rgb(247, 243, 243); */
+}

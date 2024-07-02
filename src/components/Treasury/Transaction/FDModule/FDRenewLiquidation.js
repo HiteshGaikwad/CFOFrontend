@@ -5,11 +5,11 @@ import ReactSelect from "react-select";
 import { getUserDataFromStorage } from "../../../../config/service";
 import FDRenewLiquidationGrid from "../../../Grids/TreasuryGrids/Transaction/FDModuleGrids/FDRenewLiquidationGrid";
 
-const searchNodes={
-    BankName:'',
-    CompanyName:'',
-    MaturityDate:'',
-    FDNo:''
+const searchNodes = {
+  BankName: '',
+  CompanyName: '',
+  MaturityDate: null,
+  FDNo: ''
 }
 const customStyles = {
   control: (provided, state) => ({
@@ -49,53 +49,44 @@ const FDRenewLiquidation = ({ props }) => {
   const [newSearchData, setNewSearchData] = useState(searchNodes);
   const [bankNames, setBankNames] = useState([]);
   const [companyNames, setCompanyNames] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const userData = getUserDataFromStorage()
 
-  // const handleDateChange = (date) => {
-  //   // If a date is selected, generate the current time and combine it with the selected date
-
-  //   let currentDate = "";
-  //   currentDate +=
-  //     date.slice(8, 10) + "/" + date.slice(5, 7) + "/" + date.slice(0, 4);
-
-  //   setNewSearchData({
-  //     ...newSearchData,
-  //     From_Date: currentDate,
-  //     // Read_Date: currentDate,
-  //   });
-  //   setError((prevErrors) => ({
-  //     ...prevErrors,
-  //     From_Date: "",
-  //   }));
-  // };
 
   // search user data
-  
+
   async function handleSearchUser() {
     try {
-        let notify;
-let flag=true;
-for(const key in newSearchData){
-    if(newSearchData[key]!==''){
-flag=false;
-break;
+      setIsLoading(true)
+      let notify;
+      let flag = true;
+
+      for (const key in newSearchData) {
+        if (newSearchData[key] !== '' && newSearchData[key] !== 0 && newSearchData[key] !== null) {
+          flag = false;
+          break;
+        }
+      }
+      if (!flag) {
+        let data = {
+          BankName: newSearchData?.BankName,
+          MaturityDate: newSearchData?.MaturityDate ? newSearchData?.MaturityDate : null,
+          CompanyName: newSearchData?.CompanyName?.toString(),
+          FDNo: newSearchData?.FDNo
+        };
+        const result = await RestfullApiService(data, "user/GetFDTransctionRenewLiquidation");
+        setUserInfo(result?.Result?.Table1);
+        if (result?.Status === 400) {
+          notify = () => toast.error(result?.Description)
+        }
+      } else {
+        notify = () => toast.error('Please Select At Least One Value.')
+      }
+      notify()
+    } catch (error) { } finally {
+      setIsLoading(false)
     }
-}
-if(!flag){
-      let data = {
-            BankName: newSearchData?.BankName,
-            MaturityDate: newSearchData?.MaturityDate?newSearchData?.MaturityDate:null,
-            CompanyName: newSearchData?.CompanyName,
-            FDNo: newSearchData?.FDNo
-      };
-      const result = await RestfullApiService(data, "user/GetFDTransctionRenewLiquidation");
-      setUserInfo(result?.Result?.Table1);
-    } else{
-notify= ()=> toast.error('Please Select At Least One Value.')
-    }
-    notify()
-    } catch (error) { }
   }
 
 
@@ -110,7 +101,8 @@ notify= ()=> toast.error('Please Select At Least One Value.')
 
   const handleTextField = (e) => {
     const inputValue = e.target.value;
-    if (inputValue === "" || /^[a-zA-Z][a-zA-Z\s]*$/.test(inputValue)) {
+    if (inputValue !== "") {
+      // || /"^[0-9A-Za-z-/\\\\,.=&():%@']+$"/.test(inputValue)
       setNewSearchData({ ...newSearchData, FDNo: inputValue });
     }
     // Set isRefreshed to true to indicate unsaved changes
@@ -120,13 +112,13 @@ notify= ()=> toast.error('Please Select At Least One Value.')
   function handleClearButton() {
     setNewSearchData(searchNodes);
     setUserInfo({})
-    window.location.reload(true);
+    document.getElementById('maturityDate').value = '';
     // Set isRefreshed to true to indicate unsaved changes
     // setIsRefreshed(true);
   }
 
   const handleDeleteUser = async (user) => {
-    let notify ;
+    let notify;
     try {
       let data = {
         ISINId: user?.ISINId
@@ -140,46 +132,30 @@ notify= ()=> toast.error('Please Select At Least One Value.')
     } catch (error) { }
   };
 
-  async function handleEditUser(user) {
+  async function getCompanyNames() {
     try {
-      const data={
-        ISINId: user?.ISINId?.toString()
-      }
-      const result= await RestfullApiService(data,'user/GetSingleMFISINByID')
-      const val= result?.Result?.Table1[0];
-      setNewSearchData({
-        ...newSearchData,
-        
-      })
+      const result = await RestfullApiService('', 'user/DDLFDTransactionsCoName')
+      setCompanyNames(result?.Result?.Table1)
     } catch (error) {
-      
-    }
-  }
 
-  async function getCompanyNames(){
-    try {
-        const result= await RestfullApiService('','user/DDLFDTransactionsCoName')
-        setCompanyNames(result?.Result?.Table1)
-    } catch (error) {
-        
     }
   }
-  async function getBankNames(){
+  async function getBankNames() {
     try {
-        const data={
-            Type: "bank",
-  id: 0
-        }
-        const result= await RestfullApiService(data,'user/DDLFDTransactionsBankName')
-        setBankNames(result?.Result?.Table1)
+      const data = {
+        Type: "bank",
+        id: 0
+      }
+      const result = await RestfullApiService(data, 'user/DDLFDTransactionsBankName')
+      setBankNames(result?.Result?.Table1)
     } catch (error) {
-        
+
     }
   }
-  useEffect(()=>{
-getCompanyNames()
-getBankNames()
-  },[])
+  useEffect(() => {
+    getCompanyNames()
+    getBankNames()
+  }, [])
   useEffect(() => {
     const inputFields = document.querySelectorAll("input, textarea");
     const initialValues = {};
@@ -188,7 +164,7 @@ getBankNames()
     });
     setInitialFieldValues(initialValues);
   }, []);
-  
+
   useEffect(() => {
     const inputFields = document.querySelectorAll("input, textarea");
     inputFields.forEach((input) => {
@@ -225,22 +201,30 @@ getBankNames()
       <div className="panel">
         <div className="panel-hdr">
           <h2>Renew & Liquidation</h2>
-          
-            <div className="panel-toolbar ml-2">
-              <button
-                type="button"
-                className="btn btn-sm btn-primary text-white mr-2"
-                onClick={() => {
-                    handleSearchUser()
-                }}
-                id="btn_Save"
-              >
-                Search
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-default"
-                onClick={() => {
+
+          <div className="panel-toolbar ml-2">
+            <button
+              type="button"
+              className="btn btn-sm btn-primary text-white mr-2"
+              onClick={() => {
+                handleSearchUser()
+              }}
+              id="btn_Save"
+              style={{ minWidth: '75px' }}
+            >
+              {isLoading ? (
+                <i
+                  className="fa fa-spinner fa-spin"
+                  style={{ fontSize: "14px" }}
+                ></i>
+              ) : (
+                <span id="labelsignin">Search</span>
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-default"
+              onClick={() => {
                 //   if (
                 //     !isRefreshed ||
                 //     window.confirm(
@@ -249,168 +233,169 @@ getBankNames()
                 //   ) {
                 // }
                 handleClearButton();
-                }}
-              >
-                Clear
-              </button>
-            </div>
+              }}
+            >
+              Clear
+            </button>
+          </div>
         </div>
         <div className="panel-container show">
           <div className="panel-content">
-              <>
-                <div className="row mt-2 mb-0 px-3" style={{ height: "80px" }}>
+            <>
+              <div className="row mt-2 mb-0 px-3" style={{ height: "80px" }}>
                 <div className="col-lg-3 col-md-3  form-group mb-0">
-                    <label
-                      className="form-label global-label-tag"
-                      htmlFor="ddlAddSecurityCategory"
-                    >
-                      Bank Name
-                    </label>
-                    <ReactSelect
-                      options={bankNames}
-                      value={bankNames?.find(
-                        (option) => option.label === newSearchData.BankName
-                      )}
-                      isClearable
-                      onChange={(selectedOption) => {
-                        if (selectedOption) {
-                          setNewSearchData({
-                            ...newSearchData,
-                            BankName: selectedOption.label,
-                          });
-                        } else {
-                          // Handle the case when the field is cleared
-                          setNewSearchData({
-                            ...newSearchData,
-                            BankName: "",
-                          });
-                        }
-                        // Set isRefreshed to true to indicate unsaved changes
-                        setIsRefreshed(true);
-                      }}
-                      styles={customStyles}
-                      {...props}
-                      onInputChange={(inputValue) => {
-                        if (/[^a-zA-Z\s]/.test(inputValue)) {
-                          const sanitizedInput = inputValue.replace(
-                            /[^a-zA-Z\s]/g,
-                            ""
-                          );
-                          return sanitizedInput;
-                        }
-                        return inputValue;
-                      }}
-                    />
-                  </div>
-                  <div className="col-lg-3 col-md-3  form-group mb-0">
-                    <label
-                      className="form-label global-label-tag"
-                      htmlFor="ddlAddSecurityCategory"
-                    >
-                      Company Name
-                    </label>
-                    <ReactSelect
-                      options={companyNames}
-                      value={companyNames?.find(
-                        (option) => option.label === newSearchData?.CompanyName
-                      )}
-                      isClearable
-                      onChange={(selectedOption) => {
-                        if (selectedOption) {
-                          setNewSearchData({
-                            ...newSearchData,
-                            CompanyName: selectedOption?.label
-                          });
-                        } else {
-                          // Handle the case when the field is cleared
-                          setNewSearchData({
-                            ...newSearchData,
-                            CompanyName: "",
-                          });
-                        }
-                        // Set isRefreshed to true to indicate unsaved changes
-                        setIsRefreshed(true);
-                      }}
-                      styles={customStyles}
-                      {...props}
-                      onInputChange={(inputValue) => {
-                        if (/[^a-zA-Z\s]/.test(inputValue)) {
-                          const sanitizedInput = inputValue.replace(
-                            /[^a-zA-Z\s]/g,
-                            ""
-                          );
-                          return sanitizedInput;
-                        }
-                        return inputValue;
-                      }}
-                    />
-                    
-                  </div>
-                  <div className="col-lg-3 col-md-3  form-group mb-0">
-                    <label
-                      className="form-label fs-md"
-                      htmlFor="txtAddInterestDays"
-                    >
-                      Maturity Date 
-                    </label>
-
-                    <div>
-                      <input
-                        type="date"
-                        className="input-date"
-                        style={{
-                          width: "100%",
-                          height: "2.8em",
-                          border: "0.1px solid rgb(216, 215, 215)",
-                          outline: "none",
-                          borderRadius: "3px",
-                          padding: "0px 8px",
-                        }}
-                        onChange={(e) => 
-                          { setNewSearchData({ ...newSearchData, MaturityDate: (e.target.value) }) ;
-                        }
-                          }
-                      value={newSearchData?.MaturityDate}
-                      />
-                    </div>
-                   
-                  </div>
-                  <div className="col-lg-3 col-md-3  form-group mb-0">
-                    <label
-                      className="form-label global-label-tag"
-                      htmlFor="txtAddSecurityName"
-                    >
-                      FD No
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="txtAddSecurityName"
-                      autoComplete="off"
-                      defaultValue={newSearchData?.FDNo}
-                      onChange={(e) => {
-                        handleTextField(e);
-                        // Set isRefreshed to true to indicate unsaved changes
-                        setIsRefreshed(true);
-                      }}
-                      maxLength="50"
-                    />
-                    
-                  </div>
+                  <label
+                    className="form-label global-label-tag"
+                    htmlFor="ddlAddSecurityCategory"
+                  >
+                    Bank Name
+                  </label>
+                  <ReactSelect
+                    options={bankNames}
+                    value={newSearchData?.BankName === '' ? '' : bankNames?.find(
+                      (option) => option.label === newSearchData?.BankName
+                    )}
+                    isClearable
+                    onChange={(selectedOption) => {
+                      if (selectedOption) {
+                        setNewSearchData({
+                          ...newSearchData,
+                          BankName: selectedOption?.label,
+                        });
+                      } else {
+                        // Handle the case when the field is cleared
+                        setNewSearchData({
+                          ...newSearchData,
+                          BankName: "",
+                        });
+                      }
+                      // Set isRefreshed to true to indicate unsaved changes
+                      setIsRefreshed(true);
+                    }}
+                    styles={customStyles}
+                    {...props}
+                    onInputChange={(inputValue) => {
+                      if (/[^a-zA-Z\s]/.test(inputValue)) {
+                        const sanitizedInput = inputValue.replace(
+                          /[^a-zA-Z\s]/g,
+                          ""
+                        );
+                        return sanitizedInput;
+                      }
+                      return inputValue;
+                    }}
+                  />
                 </div>
-              </>
-              {
-                userInfo?.length>0 && <div className="table-responsive table-wrap watchlist-table tblheight mt-0">
+                <div className="col-lg-3 col-md-3  form-group mb-0">
+                  <label
+                    className="form-label global-label-tag"
+                    htmlFor="ddlAddSecurityCategory"
+                  >
+                    Company Name
+                  </label>
+                  <ReactSelect
+                    options={companyNames}
+                    value={newSearchData?.CompanyName === '' ? '' : companyNames?.find(
+                      (option) => option.value === newSearchData?.CompanyName
+                    )}
+                    isClearable
+                    onChange={(selectedOption) => {
+                      if (selectedOption) {
+                        setNewSearchData({
+                          ...newSearchData,
+                          CompanyName: selectedOption?.value
+                        });
+                      } else {
+                        // Handle the case when the field is cleared
+                        setNewSearchData({
+                          ...newSearchData,
+                          CompanyName: "",
+                        });
+                      }
+                      // Set isRefreshed to true to indicate unsaved changes
+                      setIsRefreshed(true);
+                    }}
+                    styles={customStyles}
+                    {...props}
+                    onInputChange={(inputValue) => {
+                      if (/[^a-zA-Z\s]/.test(inputValue)) {
+                        const sanitizedInput = inputValue.replace(
+                          /[^a-zA-Z\s]/g,
+                          ""
+                        );
+                        return sanitizedInput;
+                      }
+                      return inputValue;
+                    }}
+                  />
+
+                </div>
+                <div className="col-lg-3 col-md-3  form-group mb-0">
+                  <label
+                    className="form-label fs-md"
+                    htmlFor="txtAddInterestDays"
+                  >
+                    Maturity Date
+                  </label>
+
+                  <div>
+                    <input
+                      type="date"
+                      id="maturityDate"
+                      className="input-date"
+                      style={{
+                        width: "100%",
+                        height: "2.8em",
+                        border: "0.1px solid rgb(216, 215, 215)",
+                        outline: "none",
+                        borderRadius: "3px",
+                        padding: "0px 8px",
+                      }}
+                      onChange={(e) => {
+                        setNewSearchData({ ...newSearchData, MaturityDate: (e.target.value) });
+                      }
+                      }
+                      value={newSearchData?.MaturityDate}
+                    />
+                  </div>
+
+                </div>
+                <div className="col-lg-3 col-md-3  form-group mb-0">
+                  <label
+                    className="form-label global-label-tag"
+                    htmlFor="txtAddSecurityName"
+                  >
+                    FD No
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter FD No"
+                    id="txtAddSecurityName"
+                    autoComplete="off"
+                    value={newSearchData?.FDNo}
+                    onChange={(e) => {
+                      handleTextField(e);
+                      // Set isRefreshed to true to indicate unsaved changes
+                      setIsRefreshed(true);
+                    }}
+                    maxLength="50"
+                  />
+
+                </div>
+              </div>
+            </>
+            {
+              userInfo?.length > 0 && <div className="table-responsive table-wrap watchlist-table tblheight mt-0">
                 <FDRenewLiquidationGrid
                   userInfo={userInfo}
-                  handleEditUser={handleEditUser}
-                  handleDeleteUser={handleDeleteUser}
+                  handleSearchUser={handleSearchUser}
                 />
               </div>
-              }
-              
+            }
+
           </div>
-          
+
         </div>
       </div>
     </>

@@ -10,6 +10,7 @@ import { FaRegEdit } from "react-icons/fa";
 import DeleteButton from "../../.././config/DeleteButton";
 import { RestfullApiService } from "../../../config/Api's";
 import { BASE_URL } from "../../../config/url";
+import { getUserDataFromStorage } from "../../../config/service";
 // Default UI for filtering
 function DefaultColumnFilter({
   column: { filterValue, preFilteredRows, setFilter },
@@ -41,6 +42,7 @@ const PanDetailsMasterGrid = ({
   setAddPanDetails,
   setIsEdit,
 }) => {
+  const userData = getUserDataFromStorage();
   const columns = useMemo(
     () => [
       {
@@ -106,9 +108,11 @@ const PanDetailsMasterGrid = ({
                 margin: "0px 13px",
               }}
               onClick={() => {
-                handleEditPanDetails(row.original);
-                setAddPanDetails(true);
-                setIsEdit(true);
+                if (userData?.Role === 'Maker') {
+                  handleEditPanDetails(row.original);
+                  setAddPanDetails(true);
+                  setIsEdit(true);
+                }
               }}
             >
               <FaRegEdit style={{ color: "#EB6400", fontSize: "18px" }} />
@@ -419,7 +423,7 @@ const PanDetailsMasterGrid = ({
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <div>
+          {/* <div>
             {Array.from(
               { length: Math.min(10, pageOptions.length) },
               (_, i) => {
@@ -444,7 +448,7 @@ const PanDetailsMasterGrid = ({
                 );
               }
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}

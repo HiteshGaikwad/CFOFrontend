@@ -7,6 +7,7 @@ import {
 } from "react-table";
 import { FaRegEdit } from "react-icons/fa";
 import DeleteButton from "../../../../config/DeleteButton";
+import { BASE_URL } from "../../../../config/url";
 
 const MfCompanyMasterGrid = ({
   userInfo,
@@ -14,6 +15,7 @@ const MfCompanyMasterGrid = ({
   handleDeleteUser,
   setAddCompanyMaster,
   setIsEdit,
+  searchInput
 }) => {
   const columns = useMemo(
     () => [
@@ -102,20 +104,24 @@ const MfCompanyMasterGrid = ({
   };
 
   // Function to download CSV file
-  const downloadCSV = () => {
-    const csvContent = convertToCSV();
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "MFCompanyMaster-Data.csv");
-      link.style.visibility = "hidden";
+  const downloadCSV = async () => {
+    try {
+      const url = `${BASE_URL}user/DownloadMFCompanyMaster?CompanyName=${searchInput}`;
+      // Create a temporary anchor element
+      const link = document.createElement('a');
+      link.href = url;
+      // Set the download attribute with a default file name
+      link.setAttribute('download', 'MFCompany-Master.xlsx');
+      // Append the link to the body
       document.body.appendChild(link);
+      // Programmatically click the link to trigger the download
       link.click();
+      // Remove the link from the document
       document.body.removeChild(link);
+    } catch (error) {
+
     }
-  };
+  }
 
   return (
     <div className="city-table-container" style={{ position: "relative" }}>
@@ -124,7 +130,7 @@ const MfCompanyMasterGrid = ({
           display: "flex",
           justifyContent: "end",
         }}
-        // className="custom-export-button"
+      // className="custom-export-button"
       >
         <button onClick={downloadCSV} className="custom-export-button">
           EXPORT
@@ -243,11 +249,10 @@ const MfCompanyMasterGrid = ({
                     >
                       {column.isSorted ? (
                         <i
-                          className={`fa-solid ${
-                            column.isSortedDesc
-                              ? "fa-arrow-down"
-                              : "fa-arrow-up"
-                          }`}
+                          className={`fa-solid ${column.isSortedDesc
+                            ? "fa-arrow-down"
+                            : "fa-arrow-up"
+                            }`}
                           style={{ color: "gray" }}
                         ></i>
                       ) : (
@@ -340,7 +345,7 @@ const MfCompanyMasterGrid = ({
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <div>
+          {/* <div>
             {Array.from(
               { length: Math.min(10, pageOptions.length) },
               (_, i) => {
@@ -366,7 +371,7 @@ const MfCompanyMasterGrid = ({
                 );
               }
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}
